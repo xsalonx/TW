@@ -4,7 +4,9 @@ import java.util.Scanner;
 public class Main {
 
     static private PseudoCond pseudoCond;
-    static private int dataSizeBound;
+    static private int dataSizeUpperBound;
+    static private int dataSizeLowerBound;
+
     static private int dataBound;
     static private int workersDelay;
 
@@ -12,21 +14,21 @@ public class Main {
     static class Worker implements Runnable {
 
         private final String name;
+        private final int index;
         private final String role;
         private final Buffer buffer;
-        private int accessingMonitorTimes = 0;
-        private int performingActionTimes = 0;
 
-        Worker(String name, String role, Buffer buffer) {
+
+        Worker(String name, String role, Buffer buffer, int index) {
             this.name = name;
             this.role = role;
             this.buffer = buffer;
-
+            this.index = index;
         }
 
         private static int[] genData() {
             Random random = new Random();
-            int[] data = new int[random.nextInt(dataSizeBound) + 1];
+            int[] data = new int[random.nextInt(dataSizeUpperBound - dataSizeLowerBound + 1) + dataSizeLowerBound];
             for (int i=0; i<data.length; i++) {
                 data[i] = random.nextInt(dataBound);
             }
@@ -47,7 +49,7 @@ public class Main {
                         data = genData();
                         buffer.produce(data);
                     } else if (role.equals("consumer")) {
-                        size = random.nextInt(dataSizeBound - 1) + 1;
+                        size = random.nextInt(dataSizeUpperBound - dataSizeLowerBound + 1) + dataSizeLowerBound;
                         data = buffer.consume(size);
                     } else {
                         throw new IllegalArgumentException("Incorrect role for worker");
@@ -74,7 +76,7 @@ public class Main {
     private static Worker[] initWorkers(int n, String role, Buffer buffer) {
         Worker[] workers = new Worker[n];
         for (int i=0; i<n; i++) {
-            workers[i] = new Worker(role + i, role, buffer);
+            workers[i] = new Worker(role + i, role, buffer, i);
         }
         return workers;
     }
@@ -106,18 +108,25 @@ public class Main {
 
     public static void main(String[] args) {
 
-        int P = 3;
-        int C = 3;
+        /*
+        * set of parameters
+        * */
+        int producersNumb = 15;
+        int consumersNumb = 15;
         int bufferSize = 10;
-        dataSizeBound = 5;
-        dataBound = 9;
-        workersDelay = 1000;
+        dataSizeUpperBound = 5;
+        dataSizeLowerBound = 1;
+        dataBound = 1;
+        workersDelay = 1;
+        String filePath = "log1.txt";
+
 
         pseudoCond = new PseudoCond();
-        Buffer buffer = new Buffer(bufferSize, pseudoCond);
+        ThreadTracingLogger threadTracingLogger = new ThreadTracingLogger(producersNumb, consumersNumb);
+        Buffer buffer = new Buffer(bufferSize, pseudoCond, threadTracingLogger);
 
-        Worker[] producers = initWorkers(P, "producer", buffer);
-        Worker[] consumers = initWorkers(C, "consumer", buffer);
+        Worker[] producers = initWorkers(producersNumb, "producer", buffer);
+        Worker[] consumers = initWorkers(consumersNumb, "consumer", buffer);
 
         Thread[] producersThreads = declareWorkersThreads(producers);
         Thread[] consumersThreads = declareWorkersThreads(consumers);
@@ -125,25 +134,29 @@ public class Main {
         startThreads(producersThreads);
         startThreads(consumersThreads);
 
+
         Scanner scanner = new Scanner(System.in);
         String command = "";
         while (! command.equals("end")) {
             command = scanner.nextLine();
             System.out.println("1: <" + command + ">");
             pseudoCond.stop = true;
+
+            System.out.println(threadTracingLogger);
+            threadTracingLogger.save(filePath);
+
             command = scanner.nextLine();
             System.out.println("2: <" + command + ">");
             sleep(10);
             if (command.equals("continue") || command.equals("end")) {
                 pseudoCond.stop = false;
-                sleep(1);
                 pseudoCond.notifyAll_();
             }
         }
+
         System.out.println("out of loop");
-        sleep(50);
         pseudoCond.end = true;
-        sleep(500);
+        sleep(1000);
 
         joinThreads(consumersThreads);
         System.out.println("Consumers joined");
