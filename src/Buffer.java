@@ -10,50 +10,67 @@ public class Buffer {
     private int putIndex = 0;
     private int takeIndex = 0;
 
-    private final Lock aLock = new ReentrantLock();
+    private final ReentrantLock aLock = new ReentrantLock();
+
     private final Condition producersCond = aLock.newCondition();
+    private final Condition firstProducerCond = aLock.newCondition();
+
     private final Condition consumersCond = aLock.newCondition();
+    private final Condition firstConsumerCond = aLock.newCondition();
+
 
     public Buffer(int size, PseudoCond pseudoCond) {
         buffer = new Integer[size];
         this.pseudoCond = pseudoCond;
     }
 
-    public void produce(int data) {
+    public void produce(int[] data) {
         aLock.lock();
         try {
-            if (currentSize == buffer.length) {
-                try {
-                    producersCond.await();
-                } catch (InterruptedException ignore) {}
-            }
+            while (aLock.hasWaiters(firstProducerCond))
+                producersCond.await();
 
-            buffer[putIndex] = data;
-            putIndex = (putIndex + 1) % buffer.length;
-            currentSize ++;
+            while (currentSize + data.length > buffer.length)
+                firstProducerCond.await();
 
-            consumersCond.signal();
+            for (int i=0; i<data.length; i++)
+                buffer[(putIndex + i) % buffer.length] = data[i];
+
+            putIndex = (putIndex + data.length) % buffer.length;
+            currentSize += data.length;
+
+            producersCond.signal();
+            firstConsumerCond.signal();
+
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         } finally {
             aLock.unlock();
         }
-
     }
 
-    public int consume() {
+    public int[] consume(int size) {
         aLock.lock();
-        int ret;
+        int[] ret = new int[size];
         try {
-            if (currentSize == 0) {
-                try {
-                    consumersCond.await();
-                } catch (InterruptedException ignore) {}
-            }
+            while( aLock.hasWaiters(firstConsumerCond))
+                consumersCond.await();
 
-            ret = buffer[takeIndex];
-            takeIndex = (takeIndex + 1) % buffer.length;
-            currentSize--;
+            while (currentSize < size)
+                firstConsumerCond.await();
 
-            producersCond.signal();
+
+            for (int i=0; i<size; i++)
+                ret[i] = buffer[(takeIndex + i) % buffer.length];
+
+            takeIndex = (takeIndex + size) % buffer.length;
+            currentSize -= size;
+
+            consumersCond.signal();
+            firstProducerCond.signal();
+
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         } finally {
             aLock.unlock();
         }

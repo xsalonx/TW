@@ -4,6 +4,9 @@ import java.util.Scanner;
 public class Main {
 
     static private PseudoCond pseudoCond;
+    static private int dataSizeBound;
+    static private int dataBound;
+
 
     static class Worker implements Runnable {
 
@@ -17,10 +20,20 @@ public class Main {
             this.buffer = buffer;
         }
 
+        private static int[] genData() {
+            Random random = new Random();
+            int[] data = new int[random.nextInt(dataSizeBound) + 1];
+            for (int i=0; i<data.length; i++) {
+                data[i] = random.nextInt(dataBound);
+            }
+            return data;
+        }
+
 
         @Override
         public void run() throws IllegalArgumentException {
-            int data;
+            int[] data;
+            int size;
             Random random = new Random();
             while (!pseudoCond.end) {
                 try {
@@ -31,12 +44,13 @@ public class Main {
                 if (!pseudoCond.stop) {
 
                     if (role.equals("producer")) {
-                        data = random.nextInt(10);
+                        data = genData();
                         buffer.produce(data);
-                        System.out.println("Producer " + name + " produced: " + data);
+                        System.out.println("Producer " + name + " produced: " + dataToString(data));
                     } else if (role.equals("consumer")) {
-                        data = buffer.consume();
-                        System.out.println("Consumer " + name + " consumed " + data);
+                        size = random.nextInt(dataSizeBound - 1) + 1;
+                        data = buffer.consume(size);
+                        System.out.println("Consumer " + name + " consumed " + dataToString(data));
                     } else {
                         throw new IllegalArgumentException("Incorrect role for worker");
                     }
@@ -48,6 +62,16 @@ public class Main {
         }
     }
 
+    private static String dataToString(int[] data) {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("[");
+        for (int a : data) {
+            stringBuilder.append(a);
+            stringBuilder.append(", ");
+        }
+        stringBuilder.append("]");
+        return stringBuilder.toString();
+    }
 
     private static Worker[] initWorkers(int n, String role, Buffer buffer) {
         Worker[] workers = new Worker[n];
@@ -76,11 +100,20 @@ public class Main {
             } catch (InterruptedException ignore) { }
     }
 
+    private static void sleep(int ms) {
+        try {
+            Thread.sleep(ms);
+        } catch (InterruptedException ignore) {}
+    }
+
     public static void main(String[] args) {
 
         int P = 3;
         int C = 3;
         int bufferSize = 10;
+        dataSizeBound = 7;
+        dataBound = 9;
+
         pseudoCond = new PseudoCond();
         Buffer buffer = new Buffer(bufferSize, pseudoCond);
 
@@ -93,10 +126,6 @@ public class Main {
         startThreads(producersThreads);
         startThreads(consumersThreads);
 
-
-
-
-        // To end
         Scanner scanner = new Scanner(System.in);
         String command = "";
         while (! command.equals("end")) {
@@ -105,25 +134,17 @@ public class Main {
             pseudoCond.stop = true;
             command = scanner.nextLine();
             System.out.println("2: <" + command + ">");
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException ignore) {}
+            sleep(10);
             if (command.equals("continue") || command.equals("end")) {
                 pseudoCond.stop = false;
-                try {
-                    Thread.sleep(1);
-                } catch (InterruptedException ignore) {}
+                sleep(1);
                 pseudoCond.notifyAll_();
             }
         }
         System.out.println("out of loop");
-        try {
-            Thread.sleep(5);
-        } catch (InterruptedException ignore) {}
+        sleep(50);
         pseudoCond.end = true;
-        try {
-            Thread.sleep(50);
-        } catch (InterruptedException ignore) {}
+        sleep(500);
 
         joinThreads(consumersThreads);
         System.out.println("Consumers joined");
