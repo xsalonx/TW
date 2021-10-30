@@ -6,6 +6,7 @@ public class Main {
     static private PseudoCond pseudoCond;
     static private int dataSizeBound;
     static private int dataBound;
+    static private int workersDelay;
 
 
     static class Worker implements Runnable {
@@ -13,11 +14,14 @@ public class Main {
         private final String name;
         private final String role;
         private final Buffer buffer;
+        private int accessingMonitorTimes = 0;
+        private int performingActionTimes = 0;
 
         Worker(String name, String role, Buffer buffer) {
             this.name = name;
             this.role = role;
             this.buffer = buffer;
+
         }
 
         private static int[] genData() {
@@ -36,21 +40,15 @@ public class Main {
             int size;
             Random random = new Random();
             while (!pseudoCond.end) {
-                try {
-                    Thread.sleep(100, 1);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+                sleep(workersDelay);
                 if (!pseudoCond.stop) {
 
                     if (role.equals("producer")) {
                         data = genData();
                         buffer.produce(data);
-                        System.out.println("Producer " + name + " produced: " + dataToString(data));
                     } else if (role.equals("consumer")) {
                         size = random.nextInt(dataSizeBound - 1) + 1;
                         data = buffer.consume(size);
-                        System.out.println("Consumer " + name + " consumed " + dataToString(data));
                     } else {
                         throw new IllegalArgumentException("Incorrect role for worker");
                     }
@@ -64,12 +62,12 @@ public class Main {
 
     private static String dataToString(int[] data) {
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("[");
+        stringBuilder.append('[');
         for (int a : data) {
             stringBuilder.append(a);
             stringBuilder.append(", ");
         }
-        stringBuilder.append("]");
+        stringBuilder.append(']');
         return stringBuilder.toString();
     }
 
@@ -111,8 +109,9 @@ public class Main {
         int P = 3;
         int C = 3;
         int bufferSize = 10;
-        dataSizeBound = 7;
+        dataSizeBound = 5;
         dataBound = 9;
+        workersDelay = 1000;
 
         pseudoCond = new PseudoCond();
         Buffer buffer = new Buffer(bufferSize, pseudoCond);
