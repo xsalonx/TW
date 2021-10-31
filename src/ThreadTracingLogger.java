@@ -4,6 +4,9 @@ import java.util.stream.IntStream;
 
 public class ThreadTracingLogger {
 
+    private int leftPadding = 25;
+    private int spaceBetweenCells = 4;
+
     private final int[] producersAccessingMonitorTimes;
     private final int[] producersCompletingTaskTimes;
 
@@ -52,31 +55,31 @@ public class ThreadTracingLogger {
         int cellWidth = digitNumb(max);
 
         int n = Math.max(producersAccessingMonitorTimes.length, consumersAccessingMonitorTimes.length);
-        getOnLineOfToString(IntStream.rangeClosed(0, n-1).toArray(), stringBuilder, cellWidth);
-        stringBuilder.append('\n');
+        stringBuilder.append(getOnLineOfToString(IntStream.rangeClosed(0, n-1).toArray(), cellWidth, "")).append('\n');
 
-        getOnLineOfToString(producersAccessingMonitorTimes, stringBuilder, cellWidth);
-        stringBuilder.append('\n');
-        getOnLineOfToString(producersCompletingTaskTimes, stringBuilder, cellWidth);
-        stringBuilder.append('\n');
-        stringBuilder.append("-".repeat(100) + "\n");
-        getOnLineOfToString(consumersAccessingMonitorTimes, stringBuilder, cellWidth);
-        stringBuilder.append('\n');
-        getOnLineOfToString(consumersCompletingTaskTimes, stringBuilder, cellWidth);
-        stringBuilder.append('\n');
+        stringBuilder
+                .append(getOnLineOfToString(producersAccessingMonitorTimes, cellWidth, "producers accessing times"))
+                .append('\n')
+                .append(getOnLineOfToString(producersCompletingTaskTimes, cellWidth, "producers completed tasks"))
+                .append('\n')
+                .append("-".repeat(100))
+                .append('\n')
+                .append(getOnLineOfToString(consumersAccessingMonitorTimes, cellWidth, "consumers accessing times"))
+                .append('\n')
+                .append(getOnLineOfToString(consumersCompletingTaskTimes, cellWidth, "consumers completed tasks"))
+                .append('\n');
 
         return stringBuilder.toString();
     }
 
-    private void getOnLineOfToString(int[] arr, StringBuilder stringBuilder, int cellWidth) {
-        int spaceBetweenCells = 4;
-        int leftPadding = 25;
-
-        stringBuilder.append(" ".repeat(leftPadding));
+    private String getOnLineOfToString(int[] arr, int cellWidth, String rowTitle) {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(rowTitle).append(" ".repeat(leftPadding - rowTitle.length()));
         for (int a : arr) {
             stringBuilder.append(" ".repeat(cellWidth - digitNumb(a) + spaceBetweenCells));
             stringBuilder.append(a);
         }
+        return stringBuilder.toString();
     }
 
     private int digitNumb(int n) {

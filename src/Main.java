@@ -16,13 +16,13 @@ public class Main {
         private final String name;
         private final int index;
         private final String role;
-        private final Buffer buffer;
+        private final BufferFourCond bufferFourCond;
 
 
-        Worker(String name, String role, Buffer buffer, int index) {
+        Worker(String name, String role, BufferFourCond bufferFourCond, int index) {
             this.name = name;
             this.role = role;
-            this.buffer = buffer;
+            this.bufferFourCond = bufferFourCond;
             this.index = index;
         }
 
@@ -47,10 +47,10 @@ public class Main {
 
                     if (role.equals("producer")) {
                         data = genData();
-                        buffer.produce(data);
+                        bufferFourCond.produce(data, index);
                     } else if (role.equals("consumer")) {
                         size = random.nextInt(dataSizeUpperBound - dataSizeLowerBound + 1) + dataSizeLowerBound;
-                        data = buffer.consume(size);
+                        data = bufferFourCond.consume(size, index);
                     } else {
                         throw new IllegalArgumentException("Incorrect role for worker");
                     }
@@ -73,10 +73,10 @@ public class Main {
         return stringBuilder.toString();
     }
 
-    private static Worker[] initWorkers(int n, String role, Buffer buffer) {
+    private static Worker[] initWorkers(int n, String role, BufferFourCond bufferFourCond) {
         Worker[] workers = new Worker[n];
         for (int i=0; i<n; i++) {
-            workers[i] = new Worker(role + i, role, buffer, i);
+            workers[i] = new Worker(role + i, role, bufferFourCond, i);
         }
         return workers;
     }
@@ -111,11 +111,11 @@ public class Main {
         /*
         * set of parameters
         * */
-        int producersNumb = 15;
-        int consumersNumb = 15;
+        int producersNumb = 11;
+        int consumersNumb = 11;
         int bufferSize = 10;
         dataSizeUpperBound = 5;
-        dataSizeLowerBound = 1;
+        dataSizeLowerBound = 3;
         dataBound = 1;
         workersDelay = 1;
         String filePath = "log1.txt";
@@ -123,10 +123,10 @@ public class Main {
 
         pseudoCond = new PseudoCond();
         ThreadTracingLogger threadTracingLogger = new ThreadTracingLogger(producersNumb, consumersNumb);
-        Buffer buffer = new Buffer(bufferSize, pseudoCond, threadTracingLogger);
+        BufferFourCond bufferFourCond = new BufferFourCond(bufferSize, pseudoCond, threadTracingLogger);
 
-        Worker[] producers = initWorkers(producersNumb, "producer", buffer);
-        Worker[] consumers = initWorkers(consumersNumb, "consumer", buffer);
+        Worker[] producers = initWorkers(producersNumb, "producer", bufferFourCond);
+        Worker[] consumers = initWorkers(consumersNumb, "consumer", bufferFourCond);
 
         Thread[] producersThreads = declareWorkersThreads(producers);
         Thread[] consumersThreads = declareWorkersThreads(consumers);
