@@ -55,21 +55,42 @@ public class ThreadTracingLogger {
         int cellWidth = digitNumb(max);
 
         int n = Math.max(producersAccessingMonitorTimes.length, consumersAccessingMonitorTimes.length);
-        stringBuilder.append(getOnLineOfToString(IntStream.rangeClosed(0, n-1).toArray(), cellWidth, "")).append('\n');
+        stringBuilder.append(getOnLineOfToString(IntStream.rangeClosed(0, n-1).toArray(), cellWidth, "worker index")).append('\n');
 
         stringBuilder
-                .append(getOnLineOfToString(producersAccessingMonitorTimes, cellWidth, "producers accessing times"))
+                .append(getOnLineOfToString(producersAccessingMonitorTimes,
+                                            cellWidth, "producers accessing times"))
                 .append('\n')
-                .append(getOnLineOfToString(producersCompletingTaskTimes, cellWidth, "producers completed tasks"))
+                .append(getOnLineOfToString(producersCompletingTaskTimes,
+                                            cellWidth, "producers completed tasks"))
+                .append('\n')
+                .append(getOnLineOfToString(
+                        getRatio(producersCompletingTaskTimes, producersAccessingMonitorTimes),
+                        cellWidth, "ratios"))
                 .append('\n')
                 .append("-".repeat(100))
                 .append('\n')
-                .append(getOnLineOfToString(consumersAccessingMonitorTimes, cellWidth, "consumers accessing times"))
+                .append(getOnLineOfToString(consumersAccessingMonitorTimes,
+                                            cellWidth, "consumers accessing times"))
                 .append('\n')
-                .append(getOnLineOfToString(consumersCompletingTaskTimes, cellWidth, "consumers completed tasks"))
+                .append(getOnLineOfToString(consumersCompletingTaskTimes,
+                                            cellWidth, "consumers completed tasks"))
+                .append('\n')
+                .append(getOnLineOfToString(
+                        getRatio(consumersCompletingTaskTimes, consumersAccessingMonitorTimes),
+                        cellWidth, "ratios"))
                 .append('\n');
 
         return stringBuilder.toString();
+    }
+
+    private float[] getRatio(int[] nominators, int[] denominators) {
+        assert nominators.length == denominators.length;
+        float[] ratios = new float[nominators.length];
+        for (int i =0; i<nominators.length; i++) {
+            ratios[i] = (float) nominators[i] / (float) denominators[i];
+        }
+        return ratios;
     }
 
     private String getOnLineOfToString(int[] arr, int cellWidth, String rowTitle) {
@@ -78,6 +99,16 @@ public class ThreadTracingLogger {
         for (int a : arr) {
             stringBuilder.append(" ".repeat(cellWidth - digitNumb(a) + spaceBetweenCells));
             stringBuilder.append(a);
+        }
+        return stringBuilder.toString();
+    }
+    private String getOnLineOfToString(float[] arr, int cellWidth, String rowTitle) {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(rowTitle).append(" ".repeat(leftPadding - rowTitle.length()));
+        for (float a : arr) {
+            String formatedFloat = String.format("%.02f", a);
+            stringBuilder.append(" ".repeat(cellWidth - formatedFloat.length() + spaceBetweenCells));
+            stringBuilder.append(formatedFloat);
         }
         return stringBuilder.toString();
     }

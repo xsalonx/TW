@@ -34,7 +34,7 @@ public class BufferTwoCond extends Buffer {
                 producersCond.await();
 
             putData(data);
-            logBufferState(data.length);
+            printBufferState(data.length);
 
             producersCond.signal();
             consumersCond.signal();
@@ -62,7 +62,7 @@ public class BufferTwoCond extends Buffer {
                 consumersCond.await();
 
             takeData(ret);
-            logBufferState(-size);
+            printBufferState(-size);
 
             consumersCond.signal();
             producersCond.signal();
@@ -96,11 +96,13 @@ public class BufferTwoCond extends Buffer {
         threadTracingLogger.logProducerAccessingMonitor(index);
 
         try {
-            while (currentSize + data.length > buffer.length)
+            while (currentSize + data.length > buffer.length) {
                 producersCond.await();
+                threadTracingLogger.logProducerAccessingMonitor(index);
+            }
 
             putData(data);
-            logBufferState(data.length);
+            printBufferState(data.length);
             threadTracingLogger.logProducerCompletingTask(index);
 
             producersCond.signal();
@@ -127,11 +129,13 @@ public class BufferTwoCond extends Buffer {
         int[] ret = new int[size];
         try {
 
-            while (currentSize < size)
+            while (currentSize < size) {
                 consumersCond.await();
+                threadTracingLogger.logConsumerAccessingMonitor(index);
+            }
 
             takeData(ret);
-            logBufferState(-size);
+            printBufferState(-size);
             threadTracingLogger.logConsumerCompletingTask(index);
 
             consumersCond.signal();

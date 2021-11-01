@@ -21,7 +21,10 @@ public class Main {
         }
 
         private int getRandSize() {
-            return random.nextInt(dataSizeUpperBound - dataSizeLowerBound + 1) + dataSizeLowerBound;
+            if (index > alterPoint)
+                return random.nextInt(dataSizeUpperBound_2 - dataSizeLowerBound_2 + 1) + dataSizeLowerBound_2;
+            else
+                return random.nextInt(dataSizeUpperBound_1 - dataSizeLowerBound_1 + 1) + dataSizeLowerBound_1;
         }
 
         private int[] genRandData() {
@@ -61,23 +64,31 @@ public class Main {
 
 
     static private PseudoCond pseudoCond;
-    static private int dataSizeUpperBound;
-    static private int dataSizeLowerBound;
+    static private int dataSizeUpperBound_1;
+    static private int dataSizeLowerBound_1;
+    static private int dataSizeUpperBound_2;
+    static private int dataSizeLowerBound_2;
 
     static private int dataBound;
     static private int workersDelay;
-
+    static private int alterPoint;
 
     public static void main(String[] args) {
 
         /*
         * set of parameters
         * */
-        int producersNumb = 50;
-        int consumersNumb = 50;
-        int bufferSize = 20;
-        dataSizeUpperBound = 10;
-        dataSizeLowerBound = 3;
+        int producersNumb = 25;
+        int consumersNumb = 20;
+        int bufferSize = 100;
+        dataSizeUpperBound_1 = 15;
+        dataSizeLowerBound_1 = 1;
+
+        alterPoint = 10;
+
+        dataSizeUpperBound_2 = 30;
+        dataSizeLowerBound_2 = 15;
+
         dataBound = 1;
         workersDelay = 1;
         String filePath = "log1.txt";
@@ -85,8 +96,8 @@ public class Main {
 
         pseudoCond = new PseudoCond();
         ThreadTracingLogger threadTracingLogger = new ThreadTracingLogger(producersNumb, consumersNumb);
-//        Buffer buffer = new BufferFourCond(bufferSize, pseudoCond, threadTracingLogger);
-        Buffer buffer = new BufferTwoCond(bufferSize, pseudoCond, threadTracingLogger);
+        Buffer buffer = new BufferFourCond(bufferSize, pseudoCond, threadTracingLogger);
+//        Buffer buffer = new BufferTwoCond(bufferSize, pseudoCond, threadTracingLogger);
 
         Worker[] producers = initWorkers(producersNumb, "producer", buffer);
         Worker[] consumers = initWorkers(consumersNumb, "consumer", buffer);

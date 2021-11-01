@@ -58,10 +58,10 @@ abstract class Buffer {
         return stringBuilder.toString();
     }
 
-    void logBufferState() {
+    void printBufferState() {
         System.out.println(getBufferState());
     }
-    void logBufferState(int change) {
+    void printBufferState(int change) {
         System.out.println(getBufferState() + " " + change);
     }
 
