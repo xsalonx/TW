@@ -1,5 +1,6 @@
 import java.lang.reflect.Array;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.stream.IntStream;
 
 public class ThreadTracingLogger {
@@ -11,17 +12,31 @@ public class ThreadTracingLogger {
     private final int[] producersAccessingMonitorTimes;
     private final int[] producersCompletingTaskTimes;
 
+    private final HashSet<Integer> firstProducerWaiters;
+    private final HashSet<Integer> producersWaiters;
+
+
     private final int[] consumersAccessingMonitorTimes;
     private final int[] consumersCompletingTaskTimes;
+
+    private final HashSet<Integer> firstConsumerWaiters;
+    private final HashSet<Integer> consumersWaiters;
+
 
     // TODO handling history o conditions "queues" changing;
 
     public ThreadTracingLogger(int producersNumb, int consumersNumb) {
         producersAccessingMonitorTimes = new int[producersNumb];
         producersCompletingTaskTimes = new int[producersNumb];
+        firstProducerWaiters = new HashSet<>();
+        producersWaiters = new HashSet<>();
 
         consumersAccessingMonitorTimes = new int[consumersNumb];
         consumersCompletingTaskTimes = new int[consumersNumb];
+        firstConsumerWaiters = new HashSet<>();
+        consumersWaiters = new HashSet<>();
+
+
     }
 
     public void logConsumerAccessingMonitor(int index) {
@@ -31,12 +46,23 @@ public class ThreadTracingLogger {
         consumersCompletingTaskTimes[index] ++;
     }
 
+    public void logFirstConsumer(int index) {firstConsumerWaiters.add(index);}
+    public void unlogFirstConsumer(int index) {firstConsumerWaiters.remove(index);}
+    public void logConsumer(int index) {consumersWaiters.add(index);}
+    public void unlogConsumer(int index) {consumersWaiters.remove(index);}
+
+
     public void logProducerAccessingMonitor(int index) {
         producersAccessingMonitorTimes[index] ++;
     }
     public void logProducerCompletingTask(int index) {
         producersCompletingTaskTimes[index] ++;
     }
+
+    public void logFirstProducer(int index) {firstProducerWaiters.add(index);}
+    public void unlogFirstProducer(int index) {firstProducerWaiters.remove(index);}
+    public void logProducer(int index) {producersWaiters.add(index);}
+    public void unlogProducer(int index) {producersWaiters.remove(index);}
 
 
     public void save(String filePath) {
@@ -64,6 +90,7 @@ public class ThreadTracingLogger {
                 .append(("/").repeat(linesLength))
                 .append('\n');
         stringBuilder.append(indexesLine).append('\n');
+
 
         stringBuilder
                 .append("_".repeat(linesLength))
@@ -94,6 +121,22 @@ public class ThreadTracingLogger {
                         getRatio(consumersCompletingTaskTimes, consumersAccessingMonitorTimes),
                         cellWidth, "ratios"))
                 .append('\n')
+                .append("\\".repeat(linesLength))
+
+                .append('\n')
+                .append(getOnLineOfToString(waitersSetToArr(firstProducerWaiters),
+                                            cellWidth, "first producer waiter"))
+                .append('\n')
+                .append(getOnLineOfToString(waitersSetToArr(producersWaiters),
+                                            cellWidth, "producer waiters"))
+                .append('\n')
+                .append(getOnLineOfToString(waitersSetToArr(firstConsumerWaiters),
+                                            cellWidth, "first consumer waiter"))
+                .append('\n')
+                .append(getOnLineOfToString(waitersSetToArr(consumersWaiters),
+                                            cellWidth, "consumers waiters"))
+                .append('\n')
+
                 .append("/".repeat(linesLength))
                 .append('\n')
                 .append("/".repeat(linesLength))
@@ -103,6 +146,15 @@ public class ThreadTracingLogger {
     }
 
 
+    private int[] waitersSetToArr(HashSet<Integer> hs) {
+        int[] arr = new int[hs.size()];
+        int i=0;
+        for (int a : hs) {
+            arr[i] = a;
+            i ++;
+        }
+        return arr;
+    }
 
 
     private float[] getRatio(int[] nominators, int[] denominators) {

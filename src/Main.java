@@ -87,7 +87,7 @@ public class Main {
         alterPoint = 10;
 
         dataSizeUpperBound_2 = 40;
-        dataSizeLowerBound_2 = 35;
+        dataSizeLowerBound_2 = 39;
 
         dataBound = 1;
         workersDelay = 1;

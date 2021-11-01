@@ -97,8 +97,10 @@ public class BufferTwoCond extends Buffer {
 
         try {
             while (currentSize + data.length > buffer.length) {
+                threadTracingLogger.logProducer(index);
                 producersCond.await();
                 threadTracingLogger.logProducerAccessingMonitor(index);
+                threadTracingLogger.unlogProducer(index);
             }
 
             putData(data);
@@ -130,8 +132,10 @@ public class BufferTwoCond extends Buffer {
         try {
 
             while (currentSize < size) {
+                threadTracingLogger.logConsumer(index);
                 consumersCond.await();
                 threadTracingLogger.logConsumerAccessingMonitor(index);
+                threadTracingLogger.unlogConsumer(index);
             }
 
             takeData(ret);
