@@ -63,7 +63,7 @@ public class Main {
 
 
 
-    static private PseudoCond pseudoCond;
+    static private PseudoCond pseudoCond =  new PseudoCond();
     static private int dataSizeUpperBound_1;
     static private int dataSizeLowerBound_1;
     static private int dataSizeUpperBound_2;
@@ -78,26 +78,31 @@ public class Main {
         /*
         * set of parameters
         * */
-        int producersNumb = 25;
-        int consumersNumb = 20;
+        int producersNumb = 20;
+        int consumersNumb = 15;
         int bufferSize = 100;
         dataSizeUpperBound_1 = 15;
         dataSizeLowerBound_1 = 1;
 
         alterPoint = 10;
 
-        dataSizeUpperBound_2 = 30;
-        dataSizeLowerBound_2 = 15;
+        dataSizeUpperBound_2 = 40;
+        dataSizeLowerBound_2 = 35;
 
         dataBound = 1;
         workersDelay = 1;
         String filePath = "log1.txt";
 
-
-        pseudoCond = new PseudoCond();
         ThreadTracingLogger threadTracingLogger = new ThreadTracingLogger(producersNumb, consumersNumb);
         Buffer buffer = new BufferFourCond(bufferSize, pseudoCond, threadTracingLogger);
 //        Buffer buffer = new BufferTwoCond(bufferSize, pseudoCond, threadTracingLogger);
+
+
+        /**
+         * end of set of parameters
+         * */
+
+
 
         Worker[] producers = initWorkers(producersNumb, "producer", buffer);
         Worker[] consumers = initWorkers(consumersNumb, "consumer", buffer);

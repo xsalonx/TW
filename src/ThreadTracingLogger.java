@@ -6,6 +6,7 @@ public class ThreadTracingLogger {
 
     private int leftPadding = 25;
     private int spaceBetweenCells = 4;
+    private int linesLength = 0;
 
     private final int[] producersAccessingMonitorTimes;
     private final int[] producersCompletingTaskTimes;
@@ -55,34 +56,54 @@ public class ThreadTracingLogger {
         int cellWidth = digitNumb(max);
 
         int n = Math.max(producersAccessingMonitorTimes.length, consumersAccessingMonitorTimes.length);
-        stringBuilder.append(getOnLineOfToString(IntStream.rangeClosed(0, n-1).toArray(), cellWidth, "worker index")).append('\n');
+        String indexesLine = getOnLineOfToString(IntStream.rangeClosed(0, n-1).toArray(), cellWidth, "worker index");
+        linesLength = indexesLine.length() + 5;
+        stringBuilder
+                .append("/".repeat(linesLength))
+                .append('\n')
+                .append(("/").repeat(linesLength))
+                .append('\n');
+        stringBuilder.append(indexesLine).append('\n');
 
         stringBuilder
+                .append("_".repeat(linesLength))
+                .append('\n')
                 .append(getOnLineOfToString(producersAccessingMonitorTimes,
                                             cellWidth, "producers accessing times"))
                 .append('\n')
                 .append(getOnLineOfToString(producersCompletingTaskTimes,
                                             cellWidth, "producers completed tasks"))
                 .append('\n')
+                .append("-".repeat(linesLength))
+                .append('\n')
                 .append(getOnLineOfToString(
                         getRatio(producersCompletingTaskTimes, producersAccessingMonitorTimes),
                         cellWidth, "ratios"))
                 .append('\n')
-                .append("-".repeat(100))
-                .append('\n')
+                .append(",".repeat(linesLength))
+                .append("\n\n")
                 .append(getOnLineOfToString(consumersAccessingMonitorTimes,
                                             cellWidth, "consumers accessing times"))
                 .append('\n')
                 .append(getOnLineOfToString(consumersCompletingTaskTimes,
                                             cellWidth, "consumers completed tasks"))
                 .append('\n')
+                .append("-".repeat(linesLength))
+                .append('\n')
                 .append(getOnLineOfToString(
                         getRatio(consumersCompletingTaskTimes, consumersAccessingMonitorTimes),
                         cellWidth, "ratios"))
+                .append('\n')
+                .append("/".repeat(linesLength))
+                .append('\n')
+                .append("/".repeat(linesLength))
                 .append('\n');
 
         return stringBuilder.toString();
     }
+
+
+
 
     private float[] getRatio(int[] nominators, int[] denominators) {
         assert nominators.length == denominators.length;
