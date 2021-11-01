@@ -1,6 +1,12 @@
 import java.util.Random;
 import java.util.Scanner;
 
+/**
+ * implementation of producers and consumers problem with two and four conditions with tracing threads' work
+ * @author Łukasz Dubiel
+ * */
+
+
 public class Main {
 
 
