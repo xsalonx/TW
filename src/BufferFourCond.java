@@ -108,17 +108,17 @@ public class BufferFourCond extends Buffer{
         }
 
         threadTracingLogger.logProducerAccessingMonitor(index);
-
+        int length = data.length;
         try {
             while (aLock.hasWaiters(firstProducerCond)) {
-                threadTracingLogger.logProducer(index);
+                threadTracingLogger.logProducer(index, length);
                 producersCond.await();
                 threadTracingLogger.logProducerAccessingMonitor(index);
                 threadTracingLogger.unlogProducer(index);
             }
 
-            while (currentSize + data.length > buffer.length) {
-                threadTracingLogger.logFirstProducer(index);
+            while (currentSize + length > buffer.length) {
+                threadTracingLogger.logFirstProducer(index, length);
                 firstProducerCond.await();
                 threadTracingLogger.logProducerAccessingMonitor(index);
                 threadTracingLogger.unlogFirstProducer(index);
@@ -153,13 +153,13 @@ public class BufferFourCond extends Buffer{
         int[] ret = new int[size];
         try {
             while(aLock.hasWaiters(firstConsumerCond)) {
-                threadTracingLogger.logConsumer(index);
+                threadTracingLogger.logConsumer(index, size);
                 consumersCond.await();
                 threadTracingLogger.logConsumerAccessingMonitor(index);
                 threadTracingLogger.unlogConsumer(index);
             }
             while (currentSize < size) {
-                threadTracingLogger.logFirstConsumer(index);
+                threadTracingLogger.logFirstConsumer(index, size);
                 firstConsumerCond.await();
                 threadTracingLogger.logConsumerAccessingMonitor(index);
                 threadTracingLogger.unlogFirstConsumer(index);

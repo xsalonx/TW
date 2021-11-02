@@ -131,6 +131,7 @@ public class Main {
             sleep(500);
             switch (commandAndParams[0]) {
                 case "continue":
+                    System.out.println("Continuing");
                 case "end":
                     pseudoCond.stop = false;
                     pseudoCond.notifyAll_();
@@ -153,12 +154,14 @@ public class Main {
                         System.out.println("program is still working !!!");
                     }
                     break;
-                case "save full":
+                case "buffer":
+                    buffer.printBufferState();
+                    break;
+                case "save":
+//                    if ()
                     threadTracingLogger.save(filePath);
                     break;
-                case "save quues":
-                    threadTracingLogger.save(filePath);
-                    break;
+
             }
         }
 

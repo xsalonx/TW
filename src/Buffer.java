@@ -42,7 +42,7 @@ abstract class Buffer {
         currentSize -= size;
     }
 
-    String getBufferState() {
+    String toStringBufferState() {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append('[');
         if (putIndex < takeIndex || currentSize == buffer.length) {
@@ -59,10 +59,10 @@ abstract class Buffer {
     }
 
     void printBufferState() {
-        System.out.println(getBufferState());
+        System.out.println(toStringBufferState() + " " + currentSize);
     }
     void printBufferState(int change) {
-        System.out.println(getBufferState() + " " + change);
+        System.out.println(toStringBufferState() + " " + change);
     }
 
 

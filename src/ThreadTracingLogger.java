@@ -43,16 +43,16 @@ public class ThreadTracingLogger {
     }
 
 
-    public void logFirstProducer(int index) {
-        currentState.firstProducerWaiters.add(index);
+    public void logFirstProducer(int index, int size) {
+        currentState.firstProducerWaiters.put(index, size);
         saveIfEnabledCurrentStateIntoHistory();
     }
     public void unlogFirstProducer(int index) {
         currentState.firstProducerWaiters.remove(index);
         saveIfEnabledCurrentStateIntoHistory();
     }
-    public void logProducer(int index) {
-        currentState.producersWaiters.add(index);
+    public void logProducer(int index, int size) {
+        currentState.producersWaiters.put(index, size);
         saveIfEnabledCurrentStateIntoHistory();
     }
     public void unlogProducer(int index) {
@@ -60,16 +60,16 @@ public class ThreadTracingLogger {
         saveIfEnabledCurrentStateIntoHistory();
     }
 
-    public void logFirstConsumer(int index) {
-        currentState.firstConsumerWaiters.add(index);
+    public void logFirstConsumer(int index, int size) {
+        currentState.firstConsumerWaiters.put(index, size);
         saveIfEnabledCurrentStateIntoHistory();
     }
     public void unlogFirstConsumer(int index) {
         currentState.firstConsumerWaiters.remove(index);
         saveIfEnabledCurrentStateIntoHistory();
     }
-    public void logConsumer(int index) {
-        currentState.consumersWaiters.add(index);
+    public void logConsumer(int index, int size) {
+        currentState.consumersWaiters.put(index, size);
         saveIfEnabledCurrentStateIntoHistory();
     }
     public void unlogConsumer(int index) {

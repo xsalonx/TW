@@ -1,5 +1,7 @@
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.stream.IntStream;
 
 public class TracingHistoryState {
@@ -12,42 +14,42 @@ public class TracingHistoryState {
     final int[] producersAccessingMonitorTimes;
     final int[] producersCompletingTaskTimes;
 
-    final HashSet<Integer> firstProducerWaiters;
-    final HashSet<Integer> producersWaiters;
+    final HashMap firstProducerWaiters;
+    final HashMap<Integer, Integer> producersWaiters;
 
 
     final int[] consumersAccessingMonitorTimes;
     final int[] consumersCompletingTaskTimes;
 
-    final HashSet<Integer> firstConsumerWaiters;
-    final HashSet<Integer> consumersWaiters;
+    final HashMap<Integer, Integer> firstConsumerWaiters;
+    final HashMap<Integer, Integer> consumersWaiters;
 
 
     TracingHistoryState(int producersNumb, int consumersNumb) {
         producersAccessingMonitorTimes = new int[producersNumb];
         producersCompletingTaskTimes = new int[producersNumb];
-        firstProducerWaiters = new HashSet<>();
-        producersWaiters = new HashSet<>();
+        firstProducerWaiters = new HashMap<>();
+        producersWaiters = new HashMap<>();
 
         consumersAccessingMonitorTimes = new int[consumersNumb];
         consumersCompletingTaskTimes = new int[consumersNumb];
-        firstConsumerWaiters = new HashSet<>();
-        consumersWaiters = new HashSet<>();
+        firstConsumerWaiters = new HashMap<>();
+        consumersWaiters = new HashMap<>();
     }
 
     TracingHistoryState(TracingHistoryState tracingHistoryState) {
         producersAccessingMonitorTimes = tracingHistoryState.producersAccessingMonitorTimes.clone();
         producersCompletingTaskTimes = tracingHistoryState.producersCompletingTaskTimes.clone();
 
-        firstProducerWaiters = (HashSet<Integer>) tracingHistoryState.firstProducerWaiters.clone();
-        producersWaiters = (HashSet<Integer>) tracingHistoryState.producersWaiters.clone();
+        firstProducerWaiters = (HashMap<Integer, Integer>) tracingHistoryState.firstProducerWaiters.clone();
+        producersWaiters = (HashMap<Integer, Integer>) tracingHistoryState.producersWaiters.clone();
 
 
         consumersAccessingMonitorTimes = tracingHistoryState.consumersAccessingMonitorTimes.clone();
         consumersCompletingTaskTimes = tracingHistoryState.consumersCompletingTaskTimes.clone();
 
-        firstConsumerWaiters = (HashSet<Integer>) tracingHistoryState.firstConsumerWaiters.clone();
-        consumersWaiters = (HashSet<Integer>) tracingHistoryState.consumersWaiters.clone();
+        firstConsumerWaiters = (HashMap<Integer, Integer>) tracingHistoryState.firstConsumerWaiters.clone();
+        consumersWaiters = (HashMap<Integer, Integer>) tracingHistoryState.consumersWaiters.clone();
     }
 
     private int calcCellWidth() {
@@ -115,25 +117,38 @@ public class TracingHistoryState {
     }
 
     String toStringWaitersData() {
-        int cellWidth = digitNumb(Math.max(producersAccessingMonitorTimes.length, consumersAccessingMonitorTimes.length));
-        return getOnLineOfToString(waitersSetToArr(firstProducerWaiters),
-                cellWidth, "first producer waiter") +
+        int cellWidth = 2 * digitNumb(Math.max(producersAccessingMonitorTimes.length, consumersAccessingMonitorTimes.length));
+        return  waitersToString(firstProducerWaiters,
+                        cellWidth, "first producer waiter") +
                 '\n' +
-                getOnLineOfToString(waitersSetToArr(producersWaiters),
+                waitersToString(producersWaiters,
                         cellWidth, "producer waiters") +
                 '\n' +
-                getOnLineOfToString(waitersSetToArr(firstConsumerWaiters),
+                waitersToString(firstConsumerWaiters,
                         cellWidth, "first consumer waiter") +
                 '\n' +
-                getOnLineOfToString(waitersSetToArr(consumersWaiters),
+                waitersToString(consumersWaiters,
                         cellWidth, "consumers waiters") +
                 '\n';
     }
 
-    private int[] waitersSetToArr(HashSet<Integer> hs) {
+    private String waitersToString(HashMap<Integer, Integer> waiters, int cellWidth, String rowTitle) {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(rowTitle).append(" ".repeat(leftPadding - rowTitle.length()));
+        for (Map.Entry<Integer, Integer> e : waiters.entrySet()) {
+            int index = e.getKey();
+            int size = e.getValue();
+            stringBuilder.append(" ".repeat(Math.max(cellWidth - digitNumb(index) - digitNumb(size) + spaceBetweenCells, 1)));
+            stringBuilder.append("\u001B[31m").append(index).append("\u001B[0m").append(":\u001B[33m").append(size).append("\u001B[0m");
+        }
+
+        return stringBuilder.toString();
+    }
+
+    private int[] waitersSetToArr(HashMap<Integer, Integer> hs) {
         int[] arr = new int[hs.size()];
         int i=0;
-        for (int a : hs) {
+        for (int a : hs.keySet()) {
             arr[i] = a;
             i ++;
         }
