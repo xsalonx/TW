@@ -59,7 +59,7 @@ abstract class Buffer {
     }
 
     void printBufferState() {
-        System.out.println(toStringBufferState() + " " + currentSize);
+        System.out.println(toStringBufferState() + "  current size:" + currentSize);
     }
     void printBufferState(int change) {
         System.out.println(toStringBufferState() + " " + change);

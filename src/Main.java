@@ -85,16 +85,16 @@ public class Main {
         /*
         * set of parameters
         * */
-        int producersNumb = 20;
-        int consumersNumb = 20;
-        int bufferSize = 100;
-        dataSizeUpperBound_1 = 40;
+        int producersNumb = 5;
+        int consumersNumb = 5;
+        int bufferSize = 20;
+        dataSizeUpperBound_1 = 10;
         dataSizeLowerBound_1 = 1;
 
-        alterPoint = 10;
+        alterPoint = 3;
 
-        dataSizeUpperBound_2 = 45;
-        dataSizeLowerBound_2 = 40;
+        dataSizeUpperBound_2 = 10;
+        dataSizeLowerBound_2 = 8;
 
         dataBound = 1;
         workersDelay = 1;
@@ -235,3 +235,18 @@ public class Main {
 
 }
 
+// do pokazania
+
+//    int producersNumb = 20;
+//    int consumersNumb = 20;
+//    int bufferSize = 100;
+//        dataSizeUpperBound_1 = 40;
+//                dataSizeLowerBound_1 = 1;
+//
+//                alterPoint = 10;
+//
+//                dataSizeUpperBound_2 = 45;
+//                dataSizeLowerBound_2 = 40;
+//
+//                dataBound = 1;
+//                workersDelay = 1;
