@@ -24,6 +24,8 @@ public class TracingHistoryState {
     final HashMap<Integer, Integer> firstConsumerWaiters;
     final HashMap<Integer, Integer> consumersWaiters;
 
+    String bufferState;
+
 
     TracingHistoryState(int producersNumb, int consumersNumb) {
         producersAccessingMonitorTimes = new int[producersNumb];
@@ -35,6 +37,8 @@ public class TracingHistoryState {
         consumersCompletingTaskTimes = new int[consumersNumb];
         firstConsumerWaiters = new HashMap<>();
         consumersWaiters = new HashMap<>();
+
+        bufferState = "";
     }
 
     TracingHistoryState(TracingHistoryState tracingHistoryState) {
@@ -50,6 +54,9 @@ public class TracingHistoryState {
 
         firstConsumerWaiters = (HashMap<Integer, Integer>) tracingHistoryState.firstConsumerWaiters.clone();
         consumersWaiters = (HashMap<Integer, Integer>) tracingHistoryState.consumersWaiters.clone();
+
+
+        bufferState = tracingHistoryState.bufferState;
     }
 
     private int calcCellWidth() {

@@ -104,6 +104,7 @@ public class Main {
         Buffer buffer = new BufferFourCond(bufferSize, pseudoCond, threadTracingLogger);
 //        Buffer buffer = new BufferTwoCond(bufferSize, pseudoCond, threadTracingLogger);
 
+        threadTracingLogger.setBuffer(buffer);
         /**
          * end of set of parameters
          * */

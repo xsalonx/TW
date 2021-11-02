@@ -8,6 +8,7 @@ public class ThreadTracingLogger {
     TracingHistoryState currentState;
     private final ArrayList<TracingHistoryState> history = new ArrayList<>();
     private boolean saveHistory = false;
+    private Buffer buffer;
 
 
     public ThreadTracingLogger(int producersNumb, int consumersNumb) {
@@ -19,9 +20,17 @@ public class ThreadTracingLogger {
         this.saveHistory = saveHistory;
     }
 
+    public void setBuffer(Buffer buffer) {
+        this.buffer = buffer;
+    }
+
     private void saveIfEnabledCurrentStateIntoHistory() {
-        if (saveHistory)
-            history.add(new TracingHistoryState(currentState));
+        if (saveHistory) {
+            TracingHistoryState tracingHistoryState = new TracingHistoryState(currentState);
+            tracingHistoryState.bufferState = buffer.toStringBufferState();
+            history.add(tracingHistoryState);
+
+        }
     }
 
     public void logProducerAccessingMonitor(int index) {
@@ -115,6 +124,7 @@ public class ThreadTracingLogger {
                 System.out.println("parsing: " + i + "/" + size);
                 stringBuilder.append(i).append("/").append(size).append("  ").append("-".repeat(100)).append('\n');
                 stringBuilder.append(s.toStringWaitersData());
+                stringBuilder.append(s.bufferState).append('\n');
             }
             i++;
         }

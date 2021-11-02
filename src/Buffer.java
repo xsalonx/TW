@@ -54,15 +54,16 @@ abstract class Buffer {
             stringBuilder.append("+".repeat(putIndex - takeIndex));
             stringBuilder.append(".".repeat(buffer.length - putIndex));
         }
-        stringBuilder.append(']');
+        stringBuilder.append(']').append("  current size:").append(currentSize);
+
         return stringBuilder.toString();
     }
 
     void printBufferState() {
-        System.out.println(toStringBufferState() + "  current size:" + currentSize);
+        System.out.println(toStringBufferState());
     }
     void printBufferState(int change) {
-        System.out.println(toStringBufferState() + " " + change);
+        System.out.println(toStringBufferState() + " change:" + change);
     }
 
 
