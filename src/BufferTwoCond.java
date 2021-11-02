@@ -9,7 +9,6 @@ public class BufferTwoCond extends Buffer {
     public BufferTwoCond(int size, PseudoCond pseudoCond) {
         super(size, pseudoCond);
     }
-
     public BufferTwoCond(int size, PseudoCond pseudoCond, ThreadTracingLogger threadTracingLogger) {
         super(size, pseudoCond, threadTracingLogger);
     }

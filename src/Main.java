@@ -1,3 +1,4 @@
+import java.util.ConcurrentModificationException;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -77,7 +78,7 @@ public class Main {
 
     static private int dataBound;
     static private int workersDelay;
-    static private int alterPoint;
+    static private int alterPoint = Integer.MAX_VALUE;
 
     public static void main(String[] args) {
 
@@ -85,24 +86,23 @@ public class Main {
         * set of parameters
         * */
         int producersNumb = 20;
-        int consumersNumb = 15;
+        int consumersNumb = 20;
         int bufferSize = 100;
-        dataSizeUpperBound_1 = 15;
+        dataSizeUpperBound_1 = 40;
         dataSizeLowerBound_1 = 1;
 
         alterPoint = 10;
 
-        dataSizeUpperBound_2 = 40;
-        dataSizeLowerBound_2 = 39;
+        dataSizeUpperBound_2 = 45;
+        dataSizeLowerBound_2 = 40;
 
         dataBound = 1;
         workersDelay = 1;
         String filePath = "log1.txt";
 
-        ThreadTracingLogger threadTracingLogger = new ThreadTracingLogger(producersNumb, consumersNumb);
+        ThreadTracingLogger threadTracingLogger = new ThreadTracingLogger(producersNumb, consumersNumb, true);
         Buffer buffer = new BufferFourCond(bufferSize, pseudoCond, threadTracingLogger);
 //        Buffer buffer = new BufferTwoCond(bufferSize, pseudoCond, threadTracingLogger);
-
 
         /**
          * end of set of parameters
@@ -121,21 +121,44 @@ public class Main {
 
 
         Scanner scanner = new Scanner(System.in);
-        String command = "";
-        while (! command.equals("end")) {
-            command = scanner.nextLine();
-            System.out.println("1: <" + command + ">");
+        String input = "";
+        while (! input.equals("end")) {
+            input = scanner.nextLine();
+            System.out.println("command: <" + input + ">");
             pseudoCond.stop = true;
+            String[] commandAndParams = input.split(" ");
 
-            System.out.println(threadTracingLogger);
-            threadTracingLogger.save(filePath);
-
-            command = scanner.nextLine();
-            System.out.println("2: <" + command + ">");
-            sleep(10);
-            if (command.equals("continue") || command.equals("end")) {
-                pseudoCond.stop = false;
-                pseudoCond.notifyAll_();
+            sleep(500);
+            switch (commandAndParams[0]) {
+                case "continue":
+                case "end":
+                    pseudoCond.stop = false;
+                    pseudoCond.notifyAll_();
+                    break;
+                case "full":
+                    try {
+                        int tail = getTail(commandAndParams);
+                        System.out.println(threadTracingLogger.toStringHistoryTail(tail));
+                    } catch (OutOfMemoryError | ConcurrentModificationException e) {
+                        e.printStackTrace();
+                        System.out.println("program is still working !!!");
+                    }
+                    break;
+                case "queues":
+                    try {
+                        int tail = getTail(commandAndParams);
+                        System.out.println(threadTracingLogger.toStringWaitersSetsStatesTail(tail));
+                    } catch (OutOfMemoryError | ConcurrentModificationException e) {
+                        e.printStackTrace();
+                        System.out.println("program is still working !!!");
+                    }
+                    break;
+                case "save full":
+                    threadTracingLogger.save(filePath);
+                    break;
+                case "save quues":
+                    threadTracingLogger.save(filePath);
+                    break;
             }
         }
 
@@ -147,6 +170,19 @@ public class Main {
         System.out.println("Consumers joined");
         joinThreads(producersThreads);
         System.out.println("Producers joined");
+    }
+
+    static private int getTail(String[] commandAndParams) {
+        int tail = 10;
+        try {
+            if (commandAndParams.length > 1) {
+                tail = Integer.parseInt(commandAndParams[1]);
+            }
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+            System.out.println("program is still working");
+        }
+        return tail;
     }
 
 
