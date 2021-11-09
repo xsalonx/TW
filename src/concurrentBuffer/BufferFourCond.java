@@ -1,6 +1,6 @@
 package concurrentBuffer;
 import pseudoCond.PseudoCond;
-import thracing.*;
+import tracing.*;
 
 import java.util.concurrent.locks.Condition;
 
@@ -13,12 +13,22 @@ public class BufferFourCond extends Buffer{
     private final Condition consumersCond = lock.newCondition();
     private final Condition firstConsumerCond = lock.newCondition();
 
-
+    private final FourConditionsTracer tracer;
+    
     public BufferFourCond(int size, PseudoCond pseudoCond) {
         super(size, pseudoCond);
+        tracer = null;
     }
-    public BufferFourCond(int size, PseudoCond pseudoCond, ThreadTracingLogger threadTracingLogger) {
-        super(size, pseudoCond, threadTracingLogger);
+
+    @Override
+    public ThreadTracingLoggerI getTracer() {
+        return (ThreadTracingLoggerI) tracer;
+    }
+
+    public BufferFourCond(int size, PseudoCond pseudoCond, int producersNumb, int consumersNumb) {
+        super(size, pseudoCond);
+        tracer = new FourConditionsTracer(producersNumb, consumersNumb, true);
+        tracer.setBuffer(this);
     }
 
 
@@ -34,15 +44,16 @@ public class BufferFourCond extends Buffer{
     public void produce(int[] data) {
         lock.lock();
 
+        int size = data.length;
         try {
             while (lock.hasWaiters(firstProducerCond))
                 producersCond.await();
 
-            while (currentSize + data.length > buffer.length)
+            while (cannotPut(size))
                 firstProducerCond.await();
 
             putData(data);
-            printBufferState(data.length);
+            printBufferState(size);
 
             producersCond.signal();
             firstConsumerCond.signal();
@@ -63,7 +74,7 @@ public class BufferFourCond extends Buffer{
             while(lock.hasWaiters(firstConsumerCond))
                 consumersCond.await();
 
-            while (currentSize < size)
+            while (cannotTake(size))
                 firstConsumerCond.await();
 
             takeData(ret);
@@ -93,26 +104,26 @@ public class BufferFourCond extends Buffer{
 
         lock.lock();
 
-        threadTracingLogger.logProducerAccessingMonitor(index);
-        int length = data.length;
+        tracer.logProducerAccessingMonitor(index);
+        int size = data.length;
         try {
             while (lock.hasWaiters(firstProducerCond)) {
-                threadTracingLogger.logProducer(index, length);
+                tracer.logProducer(index, size);
                 producersCond.await();
-                threadTracingLogger.logProducerAccessingMonitor(index);
-                threadTracingLogger.unlogProducer(index);
+                tracer.logProducerAccessingMonitor(index);
+                tracer.unlogProducer(index);
             }
 
-            while (currentSize + length > buffer.length) {
-                threadTracingLogger.logFirstProducer(index, length);
+            while (cannotPut(size)) {
+                tracer.logFirstProducer(index, size);
                 firstProducerCond.await();
-                threadTracingLogger.logProducerAccessingMonitor(index);
-                threadTracingLogger.unlogFirstProducer(index);
+                tracer.logProducerAccessingMonitor(index);
+                tracer.unlogFirstProducer(index);
             }
 
             putData(data);
-            printBufferState(data.length);
-            threadTracingLogger.logProducerCompletingTask(index);
+            printBufferState(size);
+            tracer.logProducerCompletingTask(index);
 
             producersCond.signal();
             firstConsumerCond.signal();
@@ -129,26 +140,26 @@ public class BufferFourCond extends Buffer{
 
         lock.lock();
 
-        threadTracingLogger.logConsumerAccessingMonitor(index);
+        tracer.logConsumerAccessingMonitor(index);
 
         int[] ret = new int[size];
         try {
             while(lock.hasWaiters(firstConsumerCond)) {
-                threadTracingLogger.logConsumer(index, size);
+                tracer.logConsumer(index, size);
                 consumersCond.await();
-                threadTracingLogger.logConsumerAccessingMonitor(index);
-                threadTracingLogger.unlogConsumer(index);
+                tracer.logConsumerAccessingMonitor(index);
+                tracer.unlogConsumer(index);
             }
-            while (currentSize < size) {
-                threadTracingLogger.logFirstConsumer(index, size);
+            while (cannotTake(size)) {
+                tracer.logFirstConsumer(index, size);
                 firstConsumerCond.await();
-                threadTracingLogger.logConsumerAccessingMonitor(index);
-                threadTracingLogger.unlogFirstConsumer(index);
+                tracer.logConsumerAccessingMonitor(index);
+                tracer.unlogFirstConsumer(index);
             }
 
             takeData(ret);
             printBufferState(-size);
-            threadTracingLogger.logConsumerCompletingTask(index);
+            tracer.logConsumerCompletingTask(index);
 
             consumersCond.signal();
             firstProducerCond.signal();

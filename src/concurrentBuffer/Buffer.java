@@ -1,13 +1,12 @@
 package concurrentBuffer;
 import pseudoCond.PseudoCond;
-import thracing.*;
+import tracing.*;
 import java.util.concurrent.locks.ReentrantLock;
 
 public abstract class Buffer {
 
     final int[] buffer;
     final PseudoCond pseudoCond;
-    final ThreadTracingLogger threadTracingLogger;
 
     int currentSize = 0;
     int putIndex = 0;
@@ -19,15 +18,9 @@ public abstract class Buffer {
     Buffer(int size, PseudoCond pseudoCond) {
         buffer = new int[size];
         this.pseudoCond = pseudoCond;
-        this.threadTracingLogger = null;
     }
 
-    Buffer(int size, PseudoCond pseudoCond, ThreadTracingLogger threadTracingLogger) {
-        buffer = new int[size];
-        this.pseudoCond = pseudoCond;
-        this.threadTracingLogger = threadTracingLogger;
-    }
-
+    public abstract ThreadTracingLoggerI getTracer();
 
 
     void putData(int[] data) {
@@ -71,11 +64,11 @@ public abstract class Buffer {
 
 
     // TODO
-    private boolean canPut(int size) {
-        return !(currentSize + size > buffer.length);
+    boolean cannotPut(int size) {
+        return (currentSize + size > buffer.length);
     }
-    private boolean canTake(int size) {
-        return !(currentSize - size > 0);
+    boolean cannotTake(int size) {
+        return (currentSize - size < 0);
     }
 
     abstract void produce(int[] data);

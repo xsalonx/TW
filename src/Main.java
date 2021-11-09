@@ -1,7 +1,7 @@
 import concurrentBuffer.Buffer;
 import concurrentBuffer.BufferThreeLocks;
 import pseudoCond.PseudoCond;
-import thracing.ThreadTracingLogger;
+import tracing.ThreadTracingLoggerI;
 
 import java.util.ConcurrentModificationException;
 import java.util.Random;
@@ -107,12 +107,13 @@ public class Main {
 
         boolean savingHistory = false;
 
-        ThreadTracingLogger threadTracingLogger = new ThreadTracingLogger(producersNumb, consumersNumb, savingHistory);
-        concurrentBuffer.Buffer buffer = new concurrentBuffer.BufferTwoCond(bufferSize, pseudoCond, threadTracingLogger);
-//        concurrentBuffer.Buffer buffer = new concurrentBuffer.BufferFourCond(bufferSize, pseudoCond, threadTracingLogger);
-//        Buffer buffer = new BufferThreeLocks(bufferSize, pseudoCond, threadTracingLogger);
+        Buffer buffer2 = new concurrentBuffer.BufferTwoCond(bufferSize, pseudoCond, producersNumb, consumersNumb);
+        Buffer buffer4 = new concurrentBuffer.BufferFourCond(bufferSize, pseudoCond, producersNumb, consumersNumb);
+        Buffer buffer3 = new BufferThreeLocks(bufferSize, pseudoCond, producersNumb, consumersNumb);
 
-        threadTracingLogger.setBuffer(buffer);
+        Buffer buffer = buffer3;
+
+        ThreadTracingLoggerI tracer = buffer.getTracer();
         /**
          * end of set of parameters
          * */
@@ -145,12 +146,12 @@ public class Main {
                     pseudoCond.notifyAll_();
                     break;
                 case "state":
-                    System.out.println(threadTracingLogger.getCurrentState());
+                    System.out.println(tracer.getCurrentState());
                     break;
                 case "full":
                     try {
                         int tail = getTail(commandAndParams);
-                        System.out.println(threadTracingLogger.toStringHistoryTail(tail));
+                        System.out.println(tracer.toStringHistoryTail(tail));
                     } catch (OutOfMemoryError | ConcurrentModificationException e) {
                         e.printStackTrace();
                         System.out.println("program is still working !!!");
@@ -159,7 +160,7 @@ public class Main {
                 case "queues":
                     try {
                         int tail = getTail(commandAndParams);
-                        System.out.println(threadTracingLogger.toStringWaitersSetsStatesTail(tail));
+                        System.out.println(tracer.toStringWaitersSetsStatesTail(tail));
                     } catch (OutOfMemoryError | ConcurrentModificationException e) {
                         e.printStackTrace();
                         System.out.println("program is still working !!!");
@@ -169,8 +170,7 @@ public class Main {
                     buffer.printBufferState();
                     break;
                 case "save":
-//                    if ()
-                    threadTracingLogger.save(filePath);
+                    tracer.save(filePath);
                     break;
 
             }
@@ -248,19 +248,3 @@ public class Main {
     }
 
 }
-
-// do pokazania
-
-//    int producersNumb = 20;
-//    int consumersNumb = 20;
-//    int bufferSize = 100;
-//        dataSizeUpperBound_1 = 40;
-//                dataSizeLowerBound_1 = 1;
-//
-//                alterPoint = 10;
-//
-//                dataSizeUpperBound_2 = 45;
-//                dataSizeLowerBound_2 = 40;
-//
-//                dataBound = 1;
-//                workersDelay = 1;

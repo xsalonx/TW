@@ -1,6 +1,6 @@
 package concurrentBuffer;
 import pseudoCond.PseudoCond;
-import thracing.*;
+import tracing.*;
 
 import java.util.concurrent.locks.Condition;
 
@@ -9,12 +9,21 @@ public class BufferTwoCond extends Buffer {
     private final Condition producersCond = lock.newCondition();
     private final Condition consumersCond = lock.newCondition();
 
+    private final TwoConditionsTracer tracer;
 
     public BufferTwoCond(int size, PseudoCond pseudoCond) {
         super(size, pseudoCond);
+        tracer = null;
     }
-    public BufferTwoCond(int size, PseudoCond pseudoCond, ThreadTracingLogger threadTracingLogger) {
-        super(size, pseudoCond, threadTracingLogger);
+    public BufferTwoCond(int size, PseudoCond pseudoCond, int producersNumb, int consumersNumb) {
+        super(size, pseudoCond);
+        tracer = new TwoConditionsTracer(producersNumb, consumersNumb, true);
+        tracer.setBuffer(this);
+    }
+
+    @Override
+    public ThreadTracingLoggerI getTracer() {
+        return (ThreadTracingLoggerI) tracer;
     }
 
     private void signalEveryone() {
@@ -27,8 +36,9 @@ public class BufferTwoCond extends Buffer {
     public void produce(int[] data) {
         lock.lock();
 
+        int size = data.length;
         try {
-            while (currentSize + data.length > buffer.length)
+            while (cannotPut(size))
                 producersCond.await();
 
             putData(data);
@@ -50,7 +60,7 @@ public class BufferTwoCond extends Buffer {
 
         int[] ret = new int[size];
         try {
-            while (currentSize < size)
+            while (cannotTake(size))
                 consumersCond.await();
 
             takeData(ret);
@@ -80,19 +90,19 @@ public class BufferTwoCond extends Buffer {
 
         lock.lock();
 
-        threadTracingLogger.logProducerAccessingMonitor(index);
-        int length = data.length;
+        tracer.logProducerAccessingMonitor(index);
+        int size = data.length;
         try {
-            while (currentSize + length > buffer.length) {
-                threadTracingLogger.logProducer(index, length);
+            while (cannotPut(size)) {
+                tracer.logProducer(index, size);
                 producersCond.await();
-                threadTracingLogger.logProducerAccessingMonitor(index);
-                threadTracingLogger.unlogProducer(index);
+                tracer.logProducerAccessingMonitor(index);
+                tracer.unlogProducer(index);
             }
 
             putData(data);
-            printBufferState(length);
-            threadTracingLogger.logProducerCompletingTask(index);
+            printBufferState(size);
+            tracer.logProducerCompletingTask(index);
 
             producersCond.signal();
             consumersCond.signal();
@@ -109,21 +119,21 @@ public class BufferTwoCond extends Buffer {
 
         lock.lock();
 
-        threadTracingLogger.logConsumerAccessingMonitor(index);
+        tracer.logConsumerAccessingMonitor(index);
 
         int[] ret = new int[size];
         try {
 
-            while (currentSize < size) {
-                threadTracingLogger.logConsumer(index, size);
+            while (cannotTake(size)) {
+                tracer.logConsumer(index, size);
                 consumersCond.await();
-                threadTracingLogger.logConsumerAccessingMonitor(index);
-                threadTracingLogger.unlogConsumer(index);
+                tracer.logConsumerAccessingMonitor(index);
+                tracer.unlogConsumer(index);
             }
 
             takeData(ret);
             printBufferState(-size);
-            threadTracingLogger.logConsumerCompletingTask(index);
+            tracer.logConsumerCompletingTask(index);
 
             consumersCond.signal();
             producersCond.signal();

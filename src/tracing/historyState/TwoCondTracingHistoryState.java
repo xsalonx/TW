@@ -1,59 +1,52 @@
-package thracing;
+package tracing.historyState;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.IntStream;
 
-public class TracingHistoryState {
+public class TwoCondTracingHistoryState implements StateI{
 
     private final int leftPadding = 25;
     private final int spaceBetweenCells = 2;
     private int linesLength = 0;
 
 
-    final int[] producersAccessingMonitorTimes;
-    final int[] producersCompletingTaskTimes;
+    public final int[] producersAccessingMonitorTimes;
+    public final int[] producersCompletingTaskTimes;
 
-    final HashMap<Integer, Integer> firstProducerWaiters;
-    final HashMap<Integer, Integer> producersWaiters;
+    public final HashMap<Integer, Integer> producersWaiters;
 
+    public final int[] consumersAccessingMonitorTimes;
+    public final int[] consumersCompletingTaskTimes;
 
-    final int[] consumersAccessingMonitorTimes;
-    final int[] consumersCompletingTaskTimes;
+    public final HashMap<Integer, Integer> consumersWaiters;
 
-    final HashMap<Integer, Integer> firstConsumerWaiters;
-    final HashMap<Integer, Integer> consumersWaiters;
-
-    String bufferState;
+    public String bufferState;
 
 
-    TracingHistoryState(int producersNumb, int consumersNumb) {
+    public TwoCondTracingHistoryState(int producersNumb, int consumersNumb) {
         producersAccessingMonitorTimes = new int[producersNumb];
         producersCompletingTaskTimes = new int[producersNumb];
-        firstProducerWaiters = new HashMap<>();
         producersWaiters = new HashMap<>();
 
         consumersAccessingMonitorTimes = new int[consumersNumb];
         consumersCompletingTaskTimes = new int[consumersNumb];
-        firstConsumerWaiters = new HashMap<>();
         consumersWaiters = new HashMap<>();
 
         bufferState = "";
     }
 
-    TracingHistoryState(TracingHistoryState tracingHistoryState) {
+    public TwoCondTracingHistoryState(TwoCondTracingHistoryState tracingHistoryState) {
         producersAccessingMonitorTimes = tracingHistoryState.producersAccessingMonitorTimes.clone();
         producersCompletingTaskTimes = tracingHistoryState.producersCompletingTaskTimes.clone();
 
-        firstProducerWaiters = (HashMap<Integer, Integer>) tracingHistoryState.firstProducerWaiters.clone();
         producersWaiters = (HashMap<Integer, Integer>) tracingHistoryState.producersWaiters.clone();
 
 
         consumersAccessingMonitorTimes = tracingHistoryState.consumersAccessingMonitorTimes.clone();
         consumersCompletingTaskTimes = tracingHistoryState.consumersCompletingTaskTimes.clone();
 
-        firstConsumerWaiters = (HashMap<Integer, Integer>) tracingHistoryState.firstConsumerWaiters.clone();
         consumersWaiters = (HashMap<Integer, Integer>) tracingHistoryState.consumersWaiters.clone();
 
 
@@ -124,16 +117,11 @@ public class TracingHistoryState {
                 '\n';
     }
 
-    String toStringWaitersData() {
+    public String toStringWaitersData() {
         int cellWidth = 2 * digitNumb(Math.max(producersAccessingMonitorTimes.length, consumersAccessingMonitorTimes.length));
-        return  waitersToString(firstProducerWaiters,
-                        cellWidth, "first producer waiter") +
-                '\n' +
+        return
                 waitersToString(producersWaiters,
                         cellWidth, "producer waiters") +
-                '\n' +
-                waitersToString(firstConsumerWaiters,
-                        cellWidth, "first consumer waiter") +
                 '\n' +
                 waitersToString(consumersWaiters,
                         cellWidth, "consumers waiters") +
