@@ -124,19 +124,6 @@ public class ThreeLocksTracingHistoryState implements StateI{
 
     public String toStringWaitersData() {
         return "not implemented";
-//        int cellWidth = 2 * digitNumb(Math.max(producersAccessingOuterLockTimes.length, consumersAccessingOuterLockTimes.length));
-//        return  waitersToString(firstProducerWaiters,
-//                cellWidth, "first producer waiter") +
-//                '\n' +
-//                waitersToString(producersWaiters,
-//                        cellWidth, "producer waiters") +
-//                '\n' +
-//                waitersToString(firstConsumerWaiters,
-//                        cellWidth, "first consumer waiter") +
-//                '\n' +
-//                waitersToString(consumersWaiters,
-//                        cellWidth, "consumers waiters") +
-//                '\n';
     }
 
     private String waitersToString(HashMap<Integer, Integer> waiters, int cellWidth, String rowTitle) {

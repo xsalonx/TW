@@ -174,9 +174,9 @@ public class TwoCondTracingHistoryState implements StateI{
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(rowTitle).append(" ".repeat(leftPadding - rowTitle.length()));
         for (float a : arr) {
-            String formatedFloat = String.format("%.02f", a);
-            stringBuilder.append(" ".repeat(Math.max(cellWidth - formatedFloat.length() + spaceBetweenCells, 1)));
-            stringBuilder.append(formatedFloat);
+            String formattedFloat = String.format("%.02f", a);
+            stringBuilder.append(" ".repeat(Math.max(cellWidth - formattedFloat.length() + spaceBetweenCells, 1)));
+            stringBuilder.append(formattedFloat);
         }
         return stringBuilder.toString();
     }

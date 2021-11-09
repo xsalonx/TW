@@ -14,7 +14,7 @@ public class BufferThreeLocks extends Buffer {
 
     private final ThreeLocksTracer tracer;
 
-    BufferThreeLocks(int size, PseudoCond pseudoCond) {
+    public BufferThreeLocks(int size, PseudoCond pseudoCond) {
         super(size, pseudoCond);
         tracer = null;
     }
@@ -33,7 +33,7 @@ public class BufferThreeLocks extends Buffer {
     void signalEveryone() {}
 
     @Override
-    void produce(int[] data) {
+    public void produce(int[] data) {
         lockOfProducers.lock();
 
         int size = data.length;
@@ -56,7 +56,7 @@ public class BufferThreeLocks extends Buffer {
     }
 
     @Override
-    int[] consume(int size) {
+    public int[] consume(int size) {
         lockOfConsumers.lock();
 
         int[] ret = new int[size];

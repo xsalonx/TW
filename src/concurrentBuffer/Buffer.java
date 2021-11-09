@@ -71,8 +71,8 @@ public abstract class Buffer {
         return (currentSize - size < 0);
     }
 
-    abstract void produce(int[] data);
-    abstract int[] consume(int size);
+    public abstract void produce(int[] data);
+    public abstract int[] consume(int size);
 
     public abstract void produce(int[] data, int index);
     public abstract int[] consume(int size, int index);
