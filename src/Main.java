@@ -1,3 +1,8 @@
+import concurrentBuffer.Buffer;
+import concurrentBuffer.BufferThreeLocks;
+import pseudoCond.PseudoCond;
+import thracing.ThreadTracingLogger;
+
 import java.util.ConcurrentModificationException;
 import java.util.Random;
 import java.util.Scanner;
@@ -37,7 +42,7 @@ public class Main {
         private int[] genRandData() {
             Random random = new Random();
             int[] data = new int[getRandSize()];
-            for (int i=0; i<data.length; i++) {
+            for (int i = 0; i < data.length; i++) {
                 data[i] = random.nextInt(dataBound);
             }
             return data;
@@ -69,8 +74,7 @@ public class Main {
     }
 
 
-
-    static private PseudoCond pseudoCond =  new PseudoCond();
+    static private PseudoCond pseudoCond = new PseudoCond();
     static private int dataSizeUpperBound_1;
     static private int dataSizeLowerBound_1;
     static private int dataSizeUpperBound_2;
@@ -83,32 +87,35 @@ public class Main {
     public static void main(String[] args) {
 
         /*
-        * set of parameters
-        * */
-        int producersNumb = 5;
+         * set of parameters
+         * */
+
+        int producersNumb = 20;
         int consumersNumb = 5;
-        int bufferSize = 20;
-        dataSizeUpperBound_1 = 10;
+        int bufferSize = 100;
+        dataSizeUpperBound_1 = 40;
         dataSizeLowerBound_1 = 1;
 
-        alterPoint = 3;
+        alterPoint = 10;
 
-        dataSizeUpperBound_2 = 10;
-        dataSizeLowerBound_2 = 8;
+        dataSizeUpperBound_2 = 45;
+        dataSizeLowerBound_2 = 40;
 
         dataBound = 1;
         workersDelay = 1;
         String filePath = "log1.txt";
 
-        ThreadTracingLogger threadTracingLogger = new ThreadTracingLogger(producersNumb, consumersNumb, true);
-        Buffer buffer = new BufferFourCond(bufferSize, pseudoCond, threadTracingLogger);
-//        Buffer buffer = new BufferTwoCond(bufferSize, pseudoCond, threadTracingLogger);
+        boolean savingHistory = false;
+
+        ThreadTracingLogger threadTracingLogger = new ThreadTracingLogger(producersNumb, consumersNumb, savingHistory);
+        concurrentBuffer.Buffer buffer = new concurrentBuffer.BufferTwoCond(bufferSize, pseudoCond, threadTracingLogger);
+//        concurrentBuffer.Buffer buffer = new concurrentBuffer.BufferFourCond(bufferSize, pseudoCond, threadTracingLogger);
+//        Buffer buffer = new BufferThreeLocks(bufferSize, pseudoCond, threadTracingLogger);
 
         threadTracingLogger.setBuffer(buffer);
         /**
          * end of set of parameters
          * */
-
 
 
         Worker[] producers = initWorkers(producersNumb, "producer", buffer);
@@ -123,7 +130,7 @@ public class Main {
 
         Scanner scanner = new Scanner(System.in);
         String input = "";
-        while (! input.equals("end")) {
+        while (!input.equals("end")) {
             input = scanner.nextLine();
             System.out.println("command: <" + input + ">");
             pseudoCond.stop = true;
@@ -136,6 +143,9 @@ public class Main {
                 case "end":
                     pseudoCond.stop = false;
                     pseudoCond.notifyAll_();
+                    break;
+                case "state":
+                    System.out.println(threadTracingLogger.getCurrentState());
                     break;
                 case "full":
                     try {
@@ -203,7 +213,7 @@ public class Main {
 
     private static Worker[] initWorkers(int n, String role, Buffer buffer) {
         Worker[] workers = new Worker[n];
-        for (int i=0; i<n; i++) {
+        for (int i = 0; i < n; i++) {
             workers[i] = new Worker(role + i, role, buffer, i);
         }
         return workers;
@@ -211,27 +221,30 @@ public class Main {
 
     private static Thread[] declareWorkersThreads(Worker[] workers) {
         Thread[] workersThreads = new Thread[workers.length];
-        for (int i=0; i<workers.length; i++) {
+        for (int i = 0; i < workers.length; i++) {
             workersThreads[i] = new Thread(workers[i]);
         }
         return workersThreads;
     }
 
-    private static void startThreads(Thread [] threads) {
+    private static void startThreads(Thread[] threads) {
         for (Thread th : threads)
             th.start();
     }
+
     private static void joinThreads(Thread[] threads) {
         for (Thread th : threads)
             try {
                 th.join();
-            } catch (InterruptedException ignore) { }
+            } catch (InterruptedException ignore) {
+            }
     }
 
     private static void sleep(int ms) {
         try {
             Thread.sleep(ms);
-        } catch (InterruptedException ignore) {}
+        } catch (InterruptedException ignore) {
+        }
     }
 
 }

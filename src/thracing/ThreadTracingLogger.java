@@ -1,3 +1,7 @@
+package thracing;
+
+import concurrentBuffer.Buffer;
+
 import java.util.ArrayList;
 
 
@@ -132,5 +136,13 @@ public class ThreadTracingLogger {
         return stringBuilder.toString();
     }
 
+    public TracingHistoryState getCurrentState() {
+        return currentState;
+    }
+
+    @Override
+    public String toString() {
+        return currentState.toString();
+    }
 
 }

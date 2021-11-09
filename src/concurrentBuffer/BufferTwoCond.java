@@ -1,9 +1,13 @@
+package concurrentBuffer;
+import pseudoCond.PseudoCond;
+import thracing.*;
+
 import java.util.concurrent.locks.Condition;
 
 public class BufferTwoCond extends Buffer {
 
-    private final Condition producersCond = aLock.newCondition();
-    private final Condition consumersCond = aLock.newCondition();
+    private final Condition producersCond = lock.newCondition();
+    private final Condition consumersCond = lock.newCondition();
 
 
     public BufferTwoCond(int size, PseudoCond pseudoCond) {
@@ -21,12 +25,7 @@ public class BufferTwoCond extends Buffer {
 
     @Override
     public void produce(int[] data) {
-        aLock.lock();
-        if (pseudoCond.end) {
-            signalEveryone();
-            aLock.unlock();
-            return;
-        }
+        lock.lock();
 
         try {
             while (currentSize + data.length > buffer.length)
@@ -41,19 +40,13 @@ public class BufferTwoCond extends Buffer {
         } catch (InterruptedException e) {
             e.printStackTrace();
         } finally {
-            aLock.unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public int[] consume(int size) {
-        aLock.lock();
-        if (pseudoCond.end) {
-            signalEveryone();
-            aLock.unlock();
-            return new int[size];
-        }
-
+        lock.lock();
 
         int[] ret = new int[size];
         try {
@@ -69,7 +62,7 @@ public class BufferTwoCond extends Buffer {
         } catch (InterruptedException e) {
             e.printStackTrace();
         } finally {
-            aLock.unlock();
+            lock.unlock();
         }
 
         return ret;
@@ -85,12 +78,7 @@ public class BufferTwoCond extends Buffer {
     @Override
     public void produce(int[] data, int index) {
 
-        aLock.lock();
-        if (pseudoCond.end) {
-            signalEveryone();
-            aLock.unlock();
-            return;
-        }
+        lock.lock();
 
         threadTracingLogger.logProducerAccessingMonitor(index);
         int length = data.length;
@@ -112,19 +100,15 @@ public class BufferTwoCond extends Buffer {
         } catch (InterruptedException e) {
             e.printStackTrace();
         } finally {
-            aLock.unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public int[] consume(int size, int index) {
 
-        aLock.lock();
-        if (pseudoCond.end) {
-            signalEveryone();
-            aLock.unlock();
-            return new int[size];
-        }
+        lock.lock();
+
         threadTracingLogger.logConsumerAccessingMonitor(index);
 
         int[] ret = new int[size];
@@ -147,7 +131,7 @@ public class BufferTwoCond extends Buffer {
         } catch (InterruptedException e) {
             e.printStackTrace();
         } finally {
-            aLock.unlock();
+            lock.unlock();
         }
 
         return ret;

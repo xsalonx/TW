@@ -1,14 +1,17 @@
+package concurrentBuffer;
+import pseudoCond.PseudoCond;
+import thracing.*;
 
 import java.util.concurrent.locks.Condition;
 
 public class BufferFourCond extends Buffer{
 
 
-    private final Condition producersCond = aLock.newCondition();
-    private final Condition firstProducerCond = aLock.newCondition();
+    private final Condition producersCond = lock.newCondition();
+    private final Condition firstProducerCond = lock.newCondition();
 
-    private final Condition consumersCond = aLock.newCondition();
-    private final Condition firstConsumerCond = aLock.newCondition();
+    private final Condition consumersCond = lock.newCondition();
+    private final Condition firstConsumerCond = lock.newCondition();
 
 
     public BufferFourCond(int size, PseudoCond pseudoCond) {
@@ -29,16 +32,10 @@ public class BufferFourCond extends Buffer{
 
     @Override
     public void produce(int[] data) {
-        aLock.lock();
-        if (pseudoCond.end) {
-            signalEveryone();
-            aLock.unlock();
-            return;
-        }
-
+        lock.lock();
 
         try {
-            while (aLock.hasWaiters(firstProducerCond))
+            while (lock.hasWaiters(firstProducerCond))
                 producersCond.await();
 
             while (currentSize + data.length > buffer.length)
@@ -53,23 +50,17 @@ public class BufferFourCond extends Buffer{
         } catch (InterruptedException e) {
             e.printStackTrace();
         } finally {
-            aLock.unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public int[] consume(int size) {
-        aLock.lock();
-        if (pseudoCond.end) {
-            signalEveryone();
-            aLock.unlock();
-            return new int[size];
-        }
-
+        lock.lock();
 
         int[] ret = new int[size];
         try {
-            while(aLock.hasWaiters(firstConsumerCond))
+            while(lock.hasWaiters(firstConsumerCond))
                 consumersCond.await();
 
             while (currentSize < size)
@@ -84,7 +75,7 @@ public class BufferFourCond extends Buffer{
         } catch (InterruptedException e) {
             e.printStackTrace();
         } finally {
-            aLock.unlock();
+            lock.unlock();
         }
 
         return ret;
@@ -100,17 +91,12 @@ public class BufferFourCond extends Buffer{
     @Override
     public void produce(int[] data, int index) {
 
-        aLock.lock();
-        if (pseudoCond.end) {
-            signalEveryone();
-            aLock.unlock();
-            return;
-        }
+        lock.lock();
 
         threadTracingLogger.logProducerAccessingMonitor(index);
         int length = data.length;
         try {
-            while (aLock.hasWaiters(firstProducerCond)) {
+            while (lock.hasWaiters(firstProducerCond)) {
                 threadTracingLogger.logProducer(index, length);
                 producersCond.await();
                 threadTracingLogger.logProducerAccessingMonitor(index);
@@ -134,25 +120,20 @@ public class BufferFourCond extends Buffer{
         } catch (InterruptedException e) {
             e.printStackTrace();
         } finally {
-            aLock.unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public int[] consume(int size, int index) {
 
-        aLock.lock();
-        if (pseudoCond.end) {
-            signalEveryone();
-            aLock.unlock();
-            return new int[size];
-        }
+        lock.lock();
 
         threadTracingLogger.logConsumerAccessingMonitor(index);
 
         int[] ret = new int[size];
         try {
-            while(aLock.hasWaiters(firstConsumerCond)) {
+            while(lock.hasWaiters(firstConsumerCond)) {
                 threadTracingLogger.logConsumer(index, size);
                 consumersCond.await();
                 threadTracingLogger.logConsumerAccessingMonitor(index);
@@ -175,7 +156,7 @@ public class BufferFourCond extends Buffer{
         } catch (InterruptedException e) {
             e.printStackTrace();
         } finally {
-            aLock.unlock();
+            lock.unlock();
         }
 
         return ret;

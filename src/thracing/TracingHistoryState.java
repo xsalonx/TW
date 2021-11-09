@@ -1,6 +1,7 @@
+package thracing;
+
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.stream.IntStream;
 
@@ -14,7 +15,7 @@ public class TracingHistoryState {
     final int[] producersAccessingMonitorTimes;
     final int[] producersCompletingTaskTimes;
 
-    final HashMap firstProducerWaiters;
+    final HashMap<Integer, Integer> firstProducerWaiters;
     final HashMap<Integer, Integer> producersWaiters;
 
 
@@ -118,7 +119,7 @@ public class TracingHistoryState {
                 "-".repeat(linesLength) +
                 '\n' +
                 (getOnLineOfToString(
-                        getRatio(access, completion),
+                        getRatio(completion, access),
                         cellWidth, "ratios")) +
                 '\n';
     }

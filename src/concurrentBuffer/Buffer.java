@@ -1,6 +1,9 @@
+package concurrentBuffer;
+import pseudoCond.PseudoCond;
+import thracing.*;
 import java.util.concurrent.locks.ReentrantLock;
 
-abstract class Buffer {
+public abstract class Buffer {
 
     final int[] buffer;
     final PseudoCond pseudoCond;
@@ -10,7 +13,7 @@ abstract class Buffer {
     int putIndex = 0;
     int takeIndex = 0;
 
-    final ReentrantLock aLock = new ReentrantLock();
+    final ReentrantLock lock = new ReentrantLock(true);
 
 
     Buffer(int size, PseudoCond pseudoCond) {
@@ -42,7 +45,7 @@ abstract class Buffer {
         currentSize -= size;
     }
 
-    String toStringBufferState() {
+    public String toStringBufferState() {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append('[');
         if (putIndex < takeIndex || currentSize == buffer.length) {
@@ -59,7 +62,7 @@ abstract class Buffer {
         return stringBuilder.toString();
     }
 
-    void printBufferState() {
+    public void printBufferState() {
         System.out.println(toStringBufferState());
     }
     void printBufferState(int change) {
@@ -67,10 +70,18 @@ abstract class Buffer {
     }
 
 
+    // TODO
+    private boolean canPut(int size) {
+        return !(currentSize + size > buffer.length);
+    }
+    private boolean canTake(int size) {
+        return !(currentSize - size > 0);
+    }
+
     abstract void produce(int[] data);
     abstract int[] consume(int size);
 
-    abstract void produce(int[] data, int index);
-    abstract int[] consume(int size, int index);
+    public abstract void produce(int[] data, int index);
+    public abstract int[] consume(int size, int index);
 
 }
