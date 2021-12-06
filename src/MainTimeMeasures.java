@@ -1,11 +1,7 @@
 import concurrentBuffer.*;
 import pseudoCond.PseudoCond;
 import timeMeasure.TimeMeter;
-import tracing.ThreadTracingLoggerI;
 
-import java.lang.management.ManagementFactory;
-import java.lang.management.ThreadMXBean;
-import java.util.ConcurrentModificationException;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -15,7 +11,7 @@ import java.util.Scanner;
  * */
 
 
-public class MainTime {
+public class MainTimeMeasures {
 
 
     static class Worker implements Runnable {

@@ -154,7 +154,7 @@ public class ThreeLocksTracingHistoryState implements StateI{
         assert nominators.length == denominators.length;
         float[] ratios = new float[nominators.length];
         for (int i =0; i<nominators.length; i++) {
-            ratios[i] = (float) nominators[i] / (float) denominators[i];
+            ratios[i] = 2 * (float) nominators[i] / (float) denominators[i];
         }
         return ratios;
     }

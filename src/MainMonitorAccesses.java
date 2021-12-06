@@ -13,7 +13,7 @@ import java.util.Scanner;
  * */
 
 
-public class Main {
+public class MainMonitorAccesses {
 
 
     static class Worker implements Runnable {
