@@ -80,43 +80,45 @@ public class MainMonitorAccesses {
     static private int dataSizeUpperBound_2;
     static private int dataSizeLowerBound_2;
 
-    static private int dataBound;
-    static private int workersDelay;
-    static private int alterPoint = Integer.MAX_VALUE;
+    static private int dataBound = 2;
+    static private int workersDelay = 1;
+    static private int alterPoint;
 
     public static void main(String[] args) {
 
-        /*
-         * set of parameters
-         * */
+        int producersNumb = Integer.parseInt(args[1]);
+        int consumersNumb = Integer.parseInt(args[2]);
+        int bufferSize = Integer.parseInt(args[3]);
 
-        int producersNumb = 20;
-        int consumersNumb = 5;
-        int bufferSize = 100;
-        dataSizeUpperBound_1 = 40;
         dataSizeLowerBound_1 = 1;
+        dataSizeUpperBound_1 = bufferSize / 4;
 
-        alterPoint = 10;
+        alterPoint = Math.max(producersNumb, consumersNumb) / 2;
 
-        dataSizeUpperBound_2 = 45;
-        dataSizeLowerBound_2 = 40;
+        dataSizeLowerBound_2 = bufferSize / 4;
+        dataSizeUpperBound_2 = bufferSize / 2;
 
-        dataBound = 1;
-        workersDelay = 1;
-        String filePath = "log1.txt";
+        int secondsOfMeasuring = Integer.parseInt(args[4]);
 
-        boolean savingHistory = false;
-
-        Buffer buffer2 = new concurrentBuffer.BufferTwoCond(bufferSize, pseudoCond, producersNumb, consumersNumb);
-        Buffer buffer4 = new concurrentBuffer.BufferFourCond(bufferSize, pseudoCond, producersNumb, consumersNumb);
-        Buffer buffer3 = new BufferThreeLocks(bufferSize, pseudoCond, producersNumb, consumersNumb);
-
-        Buffer buffer = buffer3;
-
+        Buffer buffer = null;
+        String monitor_type = args[0];
+        switch (monitor_type) {
+            case "2":
+                buffer = new concurrentBuffer.BufferTwoCond(bufferSize, pseudoCond, producersNumb, consumersNumb);
+                break;
+            case "3":
+                buffer = new BufferThreeLocks(bufferSize, pseudoCond, producersNumb, consumersNumb);
+                break;
+            case "4":
+                buffer = new concurrentBuffer.BufferFourCond(bufferSize, pseudoCond, producersNumb, consumersNumb);
+                break;
+        }
+        if (buffer == null) {
+            System.out.println("incorrect monitor type: " + monitor_type);
+            System.exit(1);
+        }
         ThreadTracingLoggerI tracer = buffer.getTracer();
-        /**
-         * end of set of parameters
-         * */
+
 
 
         Worker[] producers = initWorkers(producersNumb, "producer", buffer);
@@ -128,87 +130,13 @@ public class MainMonitorAccesses {
         startThreads(producersThreads);
         startThreads(consumersThreads);
 
+        sleep(1000 * secondsOfMeasuring);
 
-        Scanner scanner = new Scanner(System.in);
-        String input = "";
-        while (!input.equals("end")) {
-            input = scanner.nextLine();
-            System.out.println("command: <" + input + ">");
-            pseudoCond.stop = true;
-            String[] commandAndParams = input.split(" ");
+        pseudoCond.stop = true;
+        sleep(100);
+        System.out.println(tracer.getCurrentState());
+        System.exit(0);
 
-            sleep(500);
-            switch (commandAndParams[0]) {
-                case "continue":
-                    System.out.println("Continuing");
-                case "end":
-                    pseudoCond.stop = false;
-                    pseudoCond.notifyAll_();
-                    break;
-                case "state":
-                    System.out.println(tracer.getCurrentState());
-                    break;
-                case "full":
-                    try {
-                        int tail = getTail(commandAndParams);
-                        System.out.println(tracer.toStringHistoryTail(tail));
-                    } catch (OutOfMemoryError | ConcurrentModificationException e) {
-                        e.printStackTrace();
-                        System.out.println("program is still working !!!");
-                    }
-                    break;
-                case "queues":
-                    try {
-                        int tail = getTail(commandAndParams);
-                        System.out.println(tracer.toStringWaitersSetsStatesTail(tail));
-                    } catch (OutOfMemoryError | ConcurrentModificationException e) {
-                        e.printStackTrace();
-                        System.out.println("program is still working !!!");
-                    }
-                    break;
-                case "buffer":
-                    buffer.printBufferState();
-                    break;
-                case "save":
-                    tracer.save(filePath);
-                    break;
-
-            }
-        }
-
-        System.out.println("out of loop");
-        pseudoCond.end = true;
-        sleep(1000);
-
-        joinThreads(consumersThreads);
-        System.out.println("Consumers joined");
-        joinThreads(producersThreads);
-        System.out.println("Producers joined");
-    }
-
-    static private int getTail(String[] commandAndParams) {
-        int tail = 10;
-        try {
-            if (commandAndParams.length > 1) {
-                tail = Integer.parseInt(commandAndParams[1]);
-            }
-        } catch (NumberFormatException e) {
-            e.printStackTrace();
-            System.out.println("program is still working");
-        }
-        return tail;
-    }
-
-
-    private static String dataToString(int[] data) {
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append('[');
-        for (int a : data) {
-            stringBuilder.append(a);
-            stringBuilder.append(", ");
-        }
-        stringBuilder.append(']');
-        return stringBuilder.toString();
     }
 
     private static Worker[] initWorkers(int n, String role, Buffer buffer) {
@@ -232,13 +160,6 @@ public class MainMonitorAccesses {
             th.start();
     }
 
-    private static void joinThreads(Thread[] threads) {
-        for (Thread th : threads)
-            try {
-                th.join();
-            } catch (InterruptedException ignore) {
-            }
-    }
 
     private static void sleep(int ms) {
         try {

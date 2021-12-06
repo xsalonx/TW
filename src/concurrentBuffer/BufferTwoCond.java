@@ -26,11 +26,6 @@ public class BufferTwoCond extends Buffer {
         return (ThreadTracingLoggerI) tracer;
     }
 
-    private void signalEveryone() {
-        producersCond.signalAll();
-        consumersCond.signalAll();
-    }
-
 
     @Override
     public void produce(int[] data) {
