@@ -7,6 +7,17 @@ import java.util.stream.IntStream;
 
 public class FourCondTracingHistoryState implements StateI{
 
+    public static final String TEXT_RESET = "\u001B[0m";
+    public static final String TEXT_BLACK = "\u001B[30m";
+    public static final String TEXT_RED = "\u001B[31m";
+    public static final String TEXT_GREEN = "\u001B[32m";
+    public static final String TEXT_YELLOW = "\u001B[33m";
+    public static final String TEXT_BLUE = "\u001B[34m";
+    public static final String TEXT_PURPLE = "\u001B[35m";
+    public static final String TEXT_CYAN = "\u001B[36m";
+    public static final String TEXT_WHITE = "\u001B[37m";
+
+
     private final int leftPadding = 25;
     private final int spaceBetweenCells = 2;
     private int linesLength = 0;
@@ -25,8 +36,23 @@ public class FourCondTracingHistoryState implements StateI{
     public final HashMap<Integer, Integer> firstConsumerWaiters;
     public final HashMap<Integer, Integer> consumersWaiters;
 
+    public Integer workerInMonitorIndex;
+    public Character workerInMonitorType;
+
+    public Integer currentComplitingIndex;
+    public Character currentComplitingType;
+
     public String bufferState;
 
+    public void setWorkerInMonitor(Integer i, Character t) {
+        workerInMonitorIndex = i;
+        workerInMonitorType = t;
+    }
+
+    public void setCurrentCompliting(Integer i, Character t) {
+        currentComplitingIndex = i;
+        currentComplitingType = t;
+    }
 
     public FourCondTracingHistoryState(int producersNumb, int consumersNumb) {
         producersAccessingMonitorTimes = new int[producersNumb];
@@ -56,6 +82,11 @@ public class FourCondTracingHistoryState implements StateI{
         firstConsumerWaiters = (HashMap<Integer, Integer>) tracingHistoryState.firstConsumerWaiters.clone();
         consumersWaiters = (HashMap<Integer, Integer>) tracingHistoryState.consumersWaiters.clone();
 
+        workerInMonitorType = tracingHistoryState.workerInMonitorType;
+        workerInMonitorIndex = tracingHistoryState.workerInMonitorIndex;
+
+        currentComplitingType = tracingHistoryState.currentComplitingType;
+        currentComplitingIndex = tracingHistoryState.currentComplitingIndex;
 
         bufferState = tracingHistoryState.bufferState;
     }
@@ -87,12 +118,11 @@ public class FourCondTracingHistoryState implements StateI{
 
 
         stringBuilder
-                .append("_".repeat(linesLength))
+                .append("-".repeat(linesLength))
                 .append(toStringAccessAndCompletionData(producersAccessingMonitorTimes, producersCompletingTaskTimes))
-                .append(",".repeat(linesLength))
+                .append("-".repeat(linesLength))
                 .append("\n\n")
                 .append(toStringAccessAndCompletionData(consumersAccessingMonitorTimes, consumersCompletingTaskTimes))
-                .append("\\".repeat(linesLength))
                 .append('\n')
                 .append(toStringWaitersData())
                 .append(getTopDownBorder());
@@ -101,9 +131,7 @@ public class FourCondTracingHistoryState implements StateI{
     }
 
     String getTopDownBorder() {
-        return  "/".repeat(linesLength) +
-                '\n' +
-                "/".repeat(linesLength) +
+        return  "_".repeat(linesLength) +
                 '\n';
     }
 
@@ -126,7 +154,15 @@ public class FourCondTracingHistoryState implements StateI{
 
     public String toStringWaitersData() {
         int cellWidth = 2 * digitNumb(Math.max(producersAccessingMonitorTimes.length, consumersAccessingMonitorTimes.length));
-        return  waitersToString(firstProducerWaiters,
+        String inMonitor = "in monitor: ";
+        String compl = "compliting: ";
+        return  inMonitor + " ".repeat(leftPadding-inMonitor.length()) +
+                                TEXT_GREEN + workerInMonitorType + ": " + workerInMonitorIndex + TEXT_RESET +
+                '\n' +
+                compl + " ".repeat(leftPadding-compl.length()) +
+                TEXT_BLUE + currentComplitingType + ": " + currentComplitingIndex + TEXT_RESET +
+                '\n' +
+                waitersToString(firstProducerWaiters,
                         cellWidth, "first producer waiter") +
                 '\n' +
                 waitersToString(producersWaiters,

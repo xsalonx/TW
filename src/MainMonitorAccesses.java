@@ -1,5 +1,4 @@
 import concurrentBuffer.Buffer;
-import concurrentBuffer.BufferThreeLocks;
 import pseudoCond.PseudoCond;
 import tracing.ThreadTracingLoggerI;
 
@@ -86,9 +85,6 @@ public class MainMonitorAccesses {
 
     public static void main(String[] args) {
 
-        /*
-         * set of parameters
-         * */
 
         int producersNumb = 20;
         int consumersNumb = 5;
@@ -103,20 +99,14 @@ public class MainMonitorAccesses {
 
         dataBound = 1;
         workersDelay = 1;
-        String filePath = "log1.txt";
 
-        boolean savingHistory = false;
 
-        Buffer buffer2 = new concurrentBuffer.BufferTwoCond(bufferSize, pseudoCond, producersNumb, consumersNumb);
-        Buffer buffer4 = new concurrentBuffer.BufferFourCond(bufferSize, pseudoCond, producersNumb, consumersNumb);
-        Buffer buffer3 = new BufferThreeLocks(bufferSize, pseudoCond, producersNumb, consumersNumb);
+        Buffer buffer = new concurrentBuffer.BufferFourCond(bufferSize, pseudoCond, producersNumb, consumersNumb);
 
-        Buffer buffer = buffer3;
 
         ThreadTracingLoggerI tracer = buffer.getTracer();
-        /**
-         * end of set of parameters
-         * */
+
+
 
 
         Worker[] producers = initWorkers(producersNumb, "producer", buffer);
@@ -168,9 +158,6 @@ public class MainMonitorAccesses {
                     break;
                 case "buffer":
                     buffer.printBufferState();
-                    break;
-                case "save":
-                    tracer.save(filePath);
                     break;
 
             }
