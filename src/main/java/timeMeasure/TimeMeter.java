@@ -79,7 +79,8 @@ public class TimeMeter {
                 .append("\u001B[34m").append(getRowOfCPUTimes(producersThreads, "cpu t [mega clocks]")).append("\u001B[0m")
                 .append('\n')
                 .append(getOnLineOfToString(producersMeasurements, cellWidth, "number of meas."))
-                .append("\n")
+                .append("\n\n")
+
                 .append("\u001B[32m").append(getOnLineOfToString(consumersTimes, cellWidth, "consumers [milis]")).append("\u001B[0m")
                 .append('\n')
                 .append("\u001B[34m").append(getRowOfCPUTimes(consumersThreads, "cpu t [mega clocks]")).append("\u001B[0m")
@@ -87,7 +88,8 @@ public class TimeMeter {
                 .append(getOnLineOfToString(consumersMeasurements, cellWidth, "number of meas."))
                 .append('\n')
 
-                .append("-".repeat(linesLength));
+                .append("-".repeat(linesLength))
+                .append('\n');
 
         return stringBuilder.toString();
     }
