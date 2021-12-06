@@ -1,14 +1,8 @@
 import concurrentBuffer.*;
-import pseudoCond.PseudoCond;
-import timeMeasure.TimeMeter;
+import pseudoCond.*;
+import timeMeasure.*;
 
 import java.util.Random;
-import java.util.Scanner;
-
-/**
- * implementation of producers and consumers problem with two and four conditions with tracing threads' work
- * @author Łukasz Dubiel
- * */
 
 
 public class MainTimeMeasures {
@@ -86,14 +80,14 @@ public class MainTimeMeasures {
     static private int dataSizeUpperBound_2;
     static private int dataSizeLowerBound_2;
 
-    static private int dataBound;
-    static private int workersDelay;
+    static private int dataBound = 2;
+    static private int workersDelay = 1;
     static private int alterPoint = Integer.MAX_VALUE;
 
     static private TimeMeter timeMeter;
 
-    public static void main(String[] args) {
 
+    public static void main(String[] args) {
 
         int producersNumb = Integer.parseInt(args[1]);
         int consumersNumb = Integer.parseInt(args[2]);
@@ -113,13 +107,13 @@ public class MainTimeMeasures {
         String monitor_type = args[0];
         switch (monitor_type) {
             case "2":
-                buffer = new concurrentBuffer.BufferTwoCond(bufferSize, pseudoCond);
+                buffer = new BufferTwoCond(bufferSize, pseudoCond);
                 break;
             case "3":
                 buffer = new BufferThreeLocks(bufferSize, pseudoCond);
                 break;
             case "4":
-                buffer = new concurrentBuffer.BufferFourCond(bufferSize, pseudoCond);
+                buffer = new BufferFourCond(bufferSize, pseudoCond);
                 break;
         }
         if (buffer == null) {
@@ -134,15 +128,21 @@ public class MainTimeMeasures {
         Thread[] producersThreads = declareWorkersThreads(producers);
         Thread[] consumersThreads = declareWorkersThreads(consumers);
 
+        timeMeter = new TimeMeter(producersNumb, consumersNumb, producersThreads, consumersThreads);
+
         startThreads(producersThreads);
         startThreads(consumersThreads);
 
-        timeMeter = new TimeMeter(producersNumb, consumersNumb, producersThreads, consumersThreads);
 
+        sleep(1000 * secondsOfMeasuring);
 
-        System.out.println(timeMeter.toStringTimes());
+        pseudoCond.stop = true;
+        sleep(100);
+        System.out.println(timeMeter.toStringTimes().replaceAll("\u001B\\[[;\\d]*m", ""));
+        System.exit(0);
 
     }
+
 
     static private int getTail(String[] commandAndParams) {
         int tail = 10;

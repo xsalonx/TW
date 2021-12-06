@@ -1,23 +1,27 @@
 package concurrentBuffer;
-import pseudoCond.PseudoCond;
+import pseudoCond.*;
 import tracing.*;
 
 import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
 
-public class BufferTwoCond extends Buffer {
+public class BufferThreeLocks extends Buffer {
 
-    private final Condition producersCond = lock.newCondition();
-    private final Condition consumersCond = lock.newCondition();
+    final ReentrantLock lockOfProducers = new ReentrantLock(true);
+    final ReentrantLock lockOfConsumers = new ReentrantLock(true);
 
-    private final TwoConditionsTracer tracer;
+    final Condition finalAccessCondition = lock.newCondition();
 
-    public BufferTwoCond(int size, PseudoCond pseudoCond) {
+    private final ThreeLocksTracer tracer;
+
+    public BufferThreeLocks(int size, PseudoCond pseudoCond) {
         super(size, pseudoCond);
         tracer = null;
     }
-    public BufferTwoCond(int size, PseudoCond pseudoCond, int producersNumb, int consumersNumb) {
+
+    public BufferThreeLocks(int size, PseudoCond pseudoCond, int producersNumb, int consumersNumb) {
         super(size, pseudoCond);
-        tracer = new TwoConditionsTracer(producersNumb, consumersNumb, true);
+        tracer = new ThreeLocksTracer(producersNumb, consumersNumb, true);
         tracer.setBuffer(this);
     }
 
@@ -26,117 +30,113 @@ public class BufferTwoCond extends Buffer {
         return (ThreadTracingLoggerI) tracer;
     }
 
+    void signalEveryone() {}
 
     @Override
     public void produce(int[] data) {
-        lock.lock();
+        lockOfProducers.lock();
 
         int size = data.length;
         try {
+            lock.lock();
             while (cannotPut(size))
-                producersCond.await();
+                finalAccessCondition.await();
 
             putData(data);
-            printBufferState(data.length);
+            printBufferState(size);
 
-            producersCond.signal();
-            consumersCond.signal();
+            finalAccessCondition.signal();
 
         } catch (InterruptedException e) {
             e.printStackTrace();
         } finally {
             lock.unlock();
+            lockOfProducers.unlock();
         }
     }
 
     @Override
     public int[] consume(int size) {
-        lock.lock();
+        lockOfConsumers.lock();
 
         int[] ret = new int[size];
         try {
+
+            lock.lock();
             while (cannotTake(size))
-                consumersCond.await();
+                finalAccessCondition.await();
 
             takeData(ret);
             printBufferState(-size);
 
-            consumersCond.signal();
-            producersCond.signal();
+            finalAccessCondition.signal();
 
         } catch (InterruptedException e) {
             e.printStackTrace();
         } finally {
             lock.unlock();
+            lockOfConsumers.unlock();
         }
 
         return ret;
     }
 
-    /*
-     *
-     *
-     *
-     *
-     * */
-
     @Override
     public void produce(int[] data, int index) {
+        lockOfProducers.lock();
 
-        lock.lock();
-
-        tracer.logProducerAccessingMonitor(index);
+        tracer.logProducerAccessingOuterLock(index);
         int size = data.length;
         try {
+
+            lock.lock();
+            tracer.logProducerAccessingInnerLock(index);
             while (cannotPut(size)) {
-                tracer.logProducer(index, size);
-                producersCond.await();
-                tracer.logProducerAccessingMonitor(index);
-                tracer.unlogProducer(index);
+                finalAccessCondition.await();
+                tracer.logProducerAccessingInnerLock(index);
             }
 
             putData(data);
-            printBufferState(size);
+            printBufferState(data.length);
             tracer.logProducerCompletingTask(index);
 
-            producersCond.signal();
-            consumersCond.signal();
+            finalAccessCondition.signal();
 
         } catch (InterruptedException e) {
             e.printStackTrace();
         } finally {
             lock.unlock();
+            lockOfProducers.unlock();
         }
     }
 
     @Override
     public int[] consume(int size, int index) {
+        lockOfConsumers.lock();
 
-        lock.lock();
-
-        tracer.logConsumerAccessingMonitor(index);
+        tracer.logConsumerAccessingOuterLock(index);
 
         int[] ret = new int[size];
         try {
 
+            lock.lock();
+            tracer.logConsumerAccessingInnerLock(index);
             while (cannotTake(size)) {
-                tracer.logConsumer(index, size);
-                consumersCond.await();
-                tracer.logConsumerAccessingMonitor(index);
-                tracer.unlogConsumer(index);
+                finalAccessCondition.await();
+                tracer.logConsumerAccessingInnerLock(index);
             }
 
             takeData(ret);
             printBufferState(-size);
             tracer.logConsumerCompletingTask(index);
 
-            consumersCond.signal();
-            producersCond.signal();
+            finalAccessCondition.signal();
 
         } catch (InterruptedException e) {
             e.printStackTrace();
         } finally {
             lock.unlock();
+            lockOfConsumers.unlock();
         }
 
         return ret;

@@ -1,6 +1,5 @@
 package tracing;
 
-import tracing.historyState.FourCondTracingHistoryState;
 import tracing.historyState.StateI;
 
 public interface ThreadTracingLoggerI {

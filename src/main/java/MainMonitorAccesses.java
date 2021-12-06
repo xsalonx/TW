@@ -1,16 +1,9 @@
-import concurrentBuffer.Buffer;
-import concurrentBuffer.BufferThreeLocks;
-import pseudoCond.PseudoCond;
-import tracing.ThreadTracingLoggerI;
+import concurrentBuffer.*;
+import pseudoCond.*;
+import tracing.*;
 
-import java.util.ConcurrentModificationException;
+import java.util.Arrays;
 import java.util.Random;
-import java.util.Scanner;
-
-/**
- * implementation of producers and consumers problem with two and four conditions with tracing threads' work
- * @author Łukasz Dubiel
- * */
 
 
 public class MainMonitorAccesses {
@@ -84,6 +77,7 @@ public class MainMonitorAccesses {
     static private int workersDelay = 1;
     static private int alterPoint;
 
+
     public static void main(String[] args) {
 
         int producersNumb = Integer.parseInt(args[1]);
@@ -104,13 +98,13 @@ public class MainMonitorAccesses {
         String monitor_type = args[0];
         switch (monitor_type) {
             case "2":
-                buffer = new concurrentBuffer.BufferTwoCond(bufferSize, pseudoCond, producersNumb, consumersNumb);
+                buffer = new BufferTwoCond(bufferSize, pseudoCond, producersNumb, consumersNumb);
                 break;
             case "3":
                 buffer = new BufferThreeLocks(bufferSize, pseudoCond, producersNumb, consumersNumb);
                 break;
             case "4":
-                buffer = new concurrentBuffer.BufferFourCond(bufferSize, pseudoCond, producersNumb, consumersNumb);
+                buffer = new BufferFourCond(bufferSize, pseudoCond, producersNumb, consumersNumb);
                 break;
         }
         if (buffer == null) {
@@ -134,7 +128,7 @@ public class MainMonitorAccesses {
 
         pseudoCond.stop = true;
         sleep(100);
-        System.out.println(tracer.getCurrentState());
+        System.out.println(tracer.getCurrentState().toString().replaceAll("\u001B\\[[;\\d]*m", ""));
         System.exit(0);
 
     }
