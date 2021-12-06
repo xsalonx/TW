@@ -73,15 +73,13 @@ public class TimeMeter {
                 .append("-".repeat(linesLength)).append('\n')
 
                 .append(getOnLineOfToString(IntStream.rangeClosed(0, n-1).toArray(), cellWidth, "worker index"))
-                .append("\n\n")
-
+                .append("\n")
                 .append("\u001B[32m").append(getOnLineOfToString(producersTimes, cellWidth, "producers [milis]")).append("\u001B[0m")
                 .append('\n')
                 .append("\u001B[34m").append(getRowOfCPUTimes(producersThreads, "cpu t [mega clocks]")).append("\u001B[0m")
                 .append('\n')
                 .append(getOnLineOfToString(producersMeasurements, cellWidth, "number of meas."))
-                .append("\n\n")
-
+                .append("\n")
                 .append("\u001B[32m").append(getOnLineOfToString(consumersTimes, cellWidth, "consumers [milis]")).append("\u001B[0m")
                 .append('\n')
                 .append("\u001B[34m").append(getRowOfCPUTimes(consumersThreads, "cpu t [mega clocks]")).append("\u001B[0m")

@@ -128,7 +128,13 @@ public class MainMonitorAccesses {
 
         pseudoCond.stop = true;
         sleep(100);
-        System.out.println(tracer.getCurrentState().toString().replaceAll("\u001B\\[[;\\d]*m", ""));
+
+        String mainOutput = tracer.getCurrentState().toString().replaceAll("\u001B\\[[;\\d]*m", "");
+        int len = mainOutput.split("\n")[0].length();
+        System.out.println("_".repeat(len));
+        System.out.println(Arrays.toString(args));
+        System.out.println(mainOutput);
+
         System.exit(0);
 
     }

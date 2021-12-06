@@ -6,12 +6,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.IntStream;
 
-public class ThreeLocksTracingHistoryState implements StateI{
+public class ThreeLocksTracingHistoryState extends StateI{
 
     private final int leftPadding = 35;
     private final int spaceBetweenCells = 2;
-    private int linesLength = 0;
-
 
     public final int[] producersAccessingOuterLockTimes;
     public final int[] producersAccessingInnerLockTimes;
@@ -80,24 +78,11 @@ public class ThreeLocksTracingHistoryState implements StateI{
 
 
         stringBuilder
-                .append("_".repeat(linesLength))
                 .append(toStringAccessAndCompletionData(producersAccessingOuterLockTimes, producersAccessingInnerLockTimes, producersCompletingTaskTimes))
-                .append(",".repeat(linesLength))
-                .append("\n\n")
                 .append(toStringAccessAndCompletionData(consumersAccessingOuterLockTimes, consumersAccessingInnerLockTimes, consumersCompletingTaskTimes))
-                .append("\\".repeat(linesLength))
-                .append('\n')
-                .append(toStringWaitersData())
                 .append(getTopDownBorder());
 
         return stringBuilder.toString();
-    }
-
-    String getTopDownBorder() {
-        return  "/".repeat(linesLength) +
-                '\n' +
-                "/".repeat(linesLength) +
-                '\n';
     }
 
     String toStringAccessAndCompletionData(int[] outerLockAccess, int[] innerLockAccess, int[] completion) {
@@ -113,8 +98,6 @@ public class ThreeLocksTracingHistoryState implements StateI{
                 '\n' +
                 getOnLineOfToString(completion,
                         cellWidth, "worker completed tasks") +
-                '\n' +
-                "-".repeat(linesLength) +
                 '\n' +
                 (getOnLineOfToString(
                         getRatio(completion, locksAccessTime),

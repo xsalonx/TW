@@ -32,13 +32,6 @@ public class BufferFourCond extends Buffer{
     }
 
 
-    private void signalEveryone() {
-        producersCond.signalAll();
-        firstProducerCond.signal();
-        consumersCond.signalAll();
-        firstConsumerCond.signal();
-    }
-
 
     @Override
     public void produce(int[] data) {
@@ -53,7 +46,6 @@ public class BufferFourCond extends Buffer{
                 firstProducerCond.await();
 
             putData(data);
-            printBufferState(size);
 
             producersCond.signal();
             firstConsumerCond.signal();
@@ -78,7 +70,6 @@ public class BufferFourCond extends Buffer{
                 firstConsumerCond.await();
 
             takeData(ret);
-            printBufferState(-size);
 
             consumersCond.signal();
             firstProducerCond.signal();
@@ -122,7 +113,6 @@ public class BufferFourCond extends Buffer{
             }
 
             putData(data);
-            printBufferState(size);
             tracer.logProducerCompletingTask(index);
 
             producersCond.signal();
@@ -158,7 +148,6 @@ public class BufferFourCond extends Buffer{
             }
 
             takeData(ret);
-            printBufferState(-size);
             tracer.logConsumerCompletingTask(index);
 
             consumersCond.signal();

@@ -5,11 +5,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.IntStream;
 
-public class TwoCondTracingHistoryState implements StateI{
+public class TwoCondTracingHistoryState extends StateI{
 
     private final int leftPadding = 25;
     private final int spaceBetweenCells = 2;
-    private int linesLength = 0;
 
 
     public final int[] producersAccessingMonitorTimes;
@@ -80,25 +79,14 @@ public class TwoCondTracingHistoryState implements StateI{
 
 
         stringBuilder
-                .append("_".repeat(linesLength))
                 .append(toStringAccessAndCompletionData(producersAccessingMonitorTimes, producersCompletingTaskTimes))
-                .append(",".repeat(linesLength))
-                .append("\n\n")
                 .append(toStringAccessAndCompletionData(consumersAccessingMonitorTimes, consumersCompletingTaskTimes))
-                .append("\\".repeat(linesLength))
-                .append('\n')
-                .append(toStringWaitersData())
                 .append(getTopDownBorder());
 
         return stringBuilder.toString();
     }
 
-    String getTopDownBorder() {
-        return  "/".repeat(linesLength) +
-                '\n' +
-                "/".repeat(linesLength) +
-                '\n';
-    }
+
 
     String toStringAccessAndCompletionData(int[] access, int[] completion) {
         int cellWidth = calcCellWidth();
@@ -108,8 +96,6 @@ public class TwoCondTracingHistoryState implements StateI{
                 '\n' +
                 getOnLineOfToString(completion,
                         cellWidth, "producers completed tasks") +
-                '\n' +
-                "-".repeat(linesLength) +
                 '\n' +
                 (getOnLineOfToString(
                         getRatio(completion, access),

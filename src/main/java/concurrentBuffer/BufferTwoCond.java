@@ -37,7 +37,6 @@ public class BufferTwoCond extends Buffer {
                 producersCond.await();
 
             putData(data);
-            printBufferState(data.length);
 
             producersCond.signal();
             consumersCond.signal();
@@ -59,7 +58,6 @@ public class BufferTwoCond extends Buffer {
                 consumersCond.await();
 
             takeData(ret);
-            printBufferState(-size);
 
             consumersCond.signal();
             producersCond.signal();
@@ -96,7 +94,6 @@ public class BufferTwoCond extends Buffer {
             }
 
             putData(data);
-            printBufferState(size);
             tracer.logProducerCompletingTask(index);
 
             producersCond.signal();
@@ -127,7 +124,6 @@ public class BufferTwoCond extends Buffer {
             }
 
             takeData(ret);
-            printBufferState(-size);
             tracer.logConsumerCompletingTask(index);
 
             consumersCond.signal();

@@ -30,7 +30,6 @@ public class BufferThreeLocks extends Buffer {
         return (ThreadTracingLoggerI) tracer;
     }
 
-    void signalEveryone() {}
 
     @Override
     public void produce(int[] data) {
@@ -43,7 +42,6 @@ public class BufferThreeLocks extends Buffer {
                 finalAccessCondition.await();
 
             putData(data);
-            printBufferState(size);
 
             finalAccessCondition.signal();
 
@@ -67,7 +65,6 @@ public class BufferThreeLocks extends Buffer {
                 finalAccessCondition.await();
 
             takeData(ret);
-            printBufferState(-size);
 
             finalAccessCondition.signal();
 
@@ -97,7 +94,6 @@ public class BufferThreeLocks extends Buffer {
             }
 
             putData(data);
-            printBufferState(data.length);
             tracer.logProducerCompletingTask(index);
 
             finalAccessCondition.signal();
@@ -127,7 +123,6 @@ public class BufferThreeLocks extends Buffer {
             }
 
             takeData(ret);
-            printBufferState(-size);
             tracer.logConsumerCompletingTask(index);
 
             finalAccessCondition.signal();

@@ -2,6 +2,7 @@ import concurrentBuffer.*;
 import pseudoCond.*;
 import timeMeasure.*;
 
+import java.util.Arrays;
 import java.util.Random;
 
 
@@ -138,7 +139,13 @@ public class MainTimeMeasures {
 
         pseudoCond.stop = true;
         sleep(100);
-        System.out.println(timeMeter.toStringTimes().replaceAll("\u001B\\[[;\\d]*m", ""));
+
+        String mainOutput = timeMeter.toStringTimes().replaceAll("\u001B\\[[;\\d]*m", "");
+        int len = mainOutput.split("\n")[0].length();
+        System.out.println("_".repeat(len));
+        System.out.println(Arrays.toString(args));
+        System.out.println(mainOutput);
+
         System.exit(0);
 
     }

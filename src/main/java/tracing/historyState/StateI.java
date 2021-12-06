@@ -1,6 +1,11 @@
 package tracing.historyState;
 
-public interface StateI {
+public abstract class StateI {
 
-    public String toString();
+    int linesLength = 0;
+    String getTopDownBorder() {
+        return  "-".repeat(linesLength) +
+                '\n';
+    }
+    abstract public String toString();
 }

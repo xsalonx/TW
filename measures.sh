@@ -6,21 +6,24 @@ outputFile=measures/res
 
 measureTypes=(access time)
 
-workersNumb=(3 6 10 12)
-bufferSizes=(100 1000 10000)
+workersNumb=(3)
+monitorTypes=(2 3 4)
+bufferSizes=(100 )
 
-secondsOfMeasuring=6
+secondsOfMeasuring=1
 
 for bufferSize in "${bufferSizes[@]}"; do
     for producersNumb in "${workersNumb[@]}"; do
         for consumersNumb in "${workersNumb[@]}"; do
-            for measuresType in "${measureTypes[@]}"; do
+            for monitorType in "${monitorTypes[@]}"; do
+                for measuresType in "${measureTypes[@]}"; do
 
-              echo $measuresType $producersNumb $consumersNumb $bufferSize $secondsOfMeasuring
-              java -jar $jarPath \
-                    $measuresType $producersNumb $consumersNumb $bufferSize $secondsOfMeasuring \
-                    >> "$outputFile-$measuresType.txt";
+                    echo $measuresType $monitorType $producersNumb $consumersNumb $bufferSize $secondsOfMeasuring
+                    java -jar $jarPath \
+                          $measuresType $monitorType $producersNumb $consumersNumb $bufferSize $secondsOfMeasuring \
+                          >> "$outputFile-$measuresType.txt";
 
+                done
             done
         done
     done
