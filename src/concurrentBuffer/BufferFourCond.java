@@ -34,25 +34,26 @@ public class BufferFourCond extends Buffer{
     public void produce(int[] data, int index) {
 
         lock.lock();
-        tracer.logProducerAccessingMonitor(index, false);
-
         int size = data.length;
+
+        tracer.logProducerAccessingMonitor(index, size, false);
+
         try {
             while (lock.hasWaiters(firstProducerCond)) {
                 tracer.logProducer(index, size, true);
                 producersCond.await();
-                tracer.unlogProducer(index, true);
+                tracer.unlogProducer(index, size,true);
             }
 
             while (cannotPut(size)) {
                 tracer.logFirstProducer(index, size, true);
                 firstProducerCond.await();
-                tracer.unlogFirstProducer(index, true);
+                tracer.unlogFirstProducer(index, size,true);
             }
 
             putData(data);
             printBufferState(size);
-            tracer.logProducerCompletingTask(index, true);
+            tracer.logProducerCompletingTask(index, size,true);
 
             producersCond.signal();
             firstConsumerCond.signal();
@@ -69,26 +70,26 @@ public class BufferFourCond extends Buffer{
 
         lock.lock();
 
-        tracer.logConsumerAccessingMonitor(index, false);
+        tracer.logConsumerAccessingMonitor(index, size,false);
 
         int[] ret = new int[size];
         try {
             while(lock.hasWaiters(firstConsumerCond)) {
                 tracer.logConsumer(index, size, true);
                 consumersCond.await();
-                tracer.logConsumerAccessingMonitor(index, false);
-                tracer.unlogConsumer(index, true);
+                tracer.logConsumerAccessingMonitor(index, size,false);
+                tracer.unlogConsumer(index, size,true);
             }
             while (cannotTake(size)) {
                 tracer.logFirstConsumer(index, size, true);
                 firstConsumerCond.await();
-                tracer.logConsumerAccessingMonitor(index, false);
-                tracer.unlogFirstConsumer(index, true);
+                tracer.logConsumerAccessingMonitor(index, size,false);
+                tracer.unlogFirstConsumer(index, size,true);
             }
 
             takeData(ret);
             printBufferState(-size);
-            tracer.logConsumerCompletingTask(index, true);
+            tracer.logConsumerCompletingTask(index, size,true);
 
             consumersCond.signal();
             firstProducerCond.signal();

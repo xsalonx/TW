@@ -108,7 +108,6 @@ public class MainMonitorAccesses {
 
 
 
-
         Worker[] producers = initWorkers(producersNumb, "producer", buffer);
         Worker[] consumers = initWorkers(consumersNumb, "consumer", buffer);
 

@@ -38,20 +38,24 @@ public class FourCondTracingHistoryState implements StateI{
 
     public Integer workerInMonitorIndex;
     public Character workerInMonitorType;
+    public Integer workerInMonitorSize;
 
     public Integer currentComplitingIndex;
     public Character currentComplitingType;
+    public Integer currentComplitingSize;
 
     public String bufferState;
 
-    public void setWorkerInMonitor(Integer i, Character t) {
+    public void setWorkerInMonitor(Integer i, Character t, Integer size) {
         workerInMonitorIndex = i;
         workerInMonitorType = t;
+        workerInMonitorSize = size;
     }
 
-    public void setCurrentCompliting(Integer i, Character t) {
+    public void setCurrentCompliting(Integer i, Character t, Integer size) {
         currentComplitingIndex = i;
         currentComplitingType = t;
+        currentComplitingSize = size;
     }
 
     public FourCondTracingHistoryState(int producersNumb, int consumersNumb) {
@@ -84,9 +88,11 @@ public class FourCondTracingHistoryState implements StateI{
 
         workerInMonitorType = tracingHistoryState.workerInMonitorType;
         workerInMonitorIndex = tracingHistoryState.workerInMonitorIndex;
+        workerInMonitorSize = tracingHistoryState.workerInMonitorSize;
 
         currentComplitingType = tracingHistoryState.currentComplitingType;
         currentComplitingIndex = tracingHistoryState.currentComplitingIndex;
+        currentComplitingSize = tracingHistoryState.currentComplitingSize;
 
         bufferState = tracingHistoryState.bufferState;
     }
@@ -157,10 +163,10 @@ public class FourCondTracingHistoryState implements StateI{
         String inMonitor = "in monitor: ";
         String compl = "compliting: ";
         return  inMonitor + " ".repeat(leftPadding-inMonitor.length()) +
-                                TEXT_GREEN + workerInMonitorType + ": " + workerInMonitorIndex + TEXT_RESET +
+                                TEXT_GREEN + workerInMonitorType + ": " + workerInMonitorIndex + TEXT_YELLOW + ":" + workerInMonitorSize + TEXT_RESET +
                 '\n' +
                 compl + " ".repeat(leftPadding-compl.length()) +
-                TEXT_BLUE + currentComplitingType + ": " + currentComplitingIndex + TEXT_RESET +
+                TEXT_BLUE + currentComplitingType + ": " + currentComplitingIndex + TEXT_YELLOW + ":" + currentComplitingSize + TEXT_RESET +
                 '\n' +
                 waitersToString(firstProducerWaiters,
                         cellWidth, "first producer waiter") +

@@ -32,34 +32,34 @@ public class FourConditionsTracer implements ThreadTracingLoggerI{
     }
 
 
-    public void logProducerAccessingMonitor(int index, boolean save) {
+    public void logProducerAccessingMonitor(int index, int size, boolean save) {
         currentState.producersAccessingMonitorTimes[index] ++;
-        currentState.setWorkerInMonitor(index, 'p');
-        currentState.setCurrentCompliting(null, null);
+        currentState.setWorkerInMonitor(index, 'p', size);
+        currentState.setCurrentCompliting(null, null, null);
 
         if (save) saveStateIntoHistory();
     }
 
-    public void logProducerCompletingTask(int index, boolean save) {
+    public void logProducerCompletingTask(int index, int size, boolean save) {
         currentState.producersCompletingTaskTimes[index] ++;
-        currentState.setWorkerInMonitor(null, null);
-        currentState.setCurrentCompliting(index, 'p');
+        currentState.setWorkerInMonitor(null, null, null);
+        currentState.setCurrentCompliting(index, 'p', size);
 
         if (save) saveStateIntoHistory();
     }
 
-    public void logConsumerAccessingMonitor(int index, boolean save) {
+    public void logConsumerAccessingMonitor(int index, int size, boolean save) {
         currentState.consumersAccessingMonitorTimes[index] ++;
-        currentState.setWorkerInMonitor(index, 'c');
-        currentState.setCurrentCompliting(null, null);
+        currentState.setWorkerInMonitor(index, 'c', size);
+        currentState.setCurrentCompliting(null, null, null);
 
         if (save) saveStateIntoHistory();
     }
 
-    public void logConsumerCompletingTask(int index, boolean save) {
+    public void logConsumerCompletingTask(int index, int size, boolean save) {
         currentState.consumersCompletingTaskTimes[index] ++;
-        currentState.setWorkerInMonitor(null, null);
-        currentState.setCurrentCompliting(index, 'c');
+        currentState.setWorkerInMonitor(null, null, null);
+        currentState.setCurrentCompliting(index, 'c', size);
 
         if (save) saveStateIntoHistory();
     }
@@ -67,62 +67,62 @@ public class FourConditionsTracer implements ThreadTracingLoggerI{
 
     public void logFirstProducer(int index, int size, boolean save) {
         currentState.firstProducerWaiters.put(index, size);
-        currentState.setWorkerInMonitor(null, null);
-        currentState.setCurrentCompliting(null, null);
+        currentState.setWorkerInMonitor(null, null, null);
+        currentState.setCurrentCompliting(null, null, null);
 
         if (save) saveStateIntoHistory();
     }
 
-    public void unlogFirstProducer(int index, boolean save) {
+    public void unlogFirstProducer(int index, int size, boolean save) {
         currentState.firstProducerWaiters.remove(index);
-        currentState.setWorkerInMonitor(index, 'p');
-        currentState.setCurrentCompliting(null, null);
+        currentState.setWorkerInMonitor(index, 'p', size);
+        currentState.setCurrentCompliting(null, null, null);
 
         if (save) saveStateIntoHistory();
     }
 
     public void logProducer(int index, int size, boolean save) {
         currentState.producersWaiters.put(index, size);
-        currentState.setWorkerInMonitor(null, null);
-        currentState.setCurrentCompliting(null, null);
+        currentState.setWorkerInMonitor(null, null, null);
+        currentState.setCurrentCompliting(null, null, null);
         if (save) saveStateIntoHistory();
     }
-    public void unlogProducer(int index, boolean save) {
+    public void unlogProducer(int index, int size, boolean save) {
         currentState.producersWaiters.remove(index);
-        currentState.setWorkerInMonitor(index, 'p');
-        currentState.setCurrentCompliting(null, null);
+        currentState.setWorkerInMonitor(index, 'p', size);
+        currentState.setCurrentCompliting(null, null, null);
 
         if (save) saveStateIntoHistory();
     }
 
     public void logFirstConsumer(int index, int size, boolean save) {
         currentState.firstConsumerWaiters.put(index, size);
-        currentState.setWorkerInMonitor(null, null);
-        currentState.setCurrentCompliting(null, null);
+        currentState.setWorkerInMonitor(null, null, null);
+        currentState.setCurrentCompliting(null, null, null);
 
         if (save) saveStateIntoHistory();
     }
 
-    public void unlogFirstConsumer(int index, boolean save) {
+    public void unlogFirstConsumer(int index, int size, boolean save) {
         currentState.firstConsumerWaiters.remove(index);
-        currentState.setWorkerInMonitor(index, 'c');
-        currentState.setCurrentCompliting(null, null);
+        currentState.setWorkerInMonitor(index, 'c', size);
+        currentState.setCurrentCompliting(null, null, null);
 
         if (save) saveStateIntoHistory();
     }
 
     public void logConsumer(int index, int size, boolean save) {
         currentState.consumersWaiters.put(index, size);
-        currentState.setWorkerInMonitor(null, null);
-        currentState.setCurrentCompliting(null, null);
+        currentState.setWorkerInMonitor(null, null, null);
+        currentState.setCurrentCompliting(null, null, null);
 
         if (save) saveStateIntoHistory();
     }
 
-    public void unlogConsumer(int index, boolean save) {
+    public void unlogConsumer(int index, int size, boolean save) {
         currentState.consumersWaiters.remove(index);
-        currentState.setWorkerInMonitor(index, 'c');
-        currentState.setCurrentCompliting(null, null);
+        currentState.setWorkerInMonitor(index, 'c', size);
+        currentState.setCurrentCompliting(null, null, null);
 
         if (save) saveStateIntoHistory();
     }
