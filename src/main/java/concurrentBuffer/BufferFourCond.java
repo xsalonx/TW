@@ -1,5 +1,5 @@
 package concurrentBuffer;
-import pseudoCond.PseudoCond;
+import pseudoCond.*;
 import tracing.*;
 
 import java.util.concurrent.locks.Condition;
@@ -36,7 +36,7 @@ public class BufferFourCond extends Buffer{
         lock.lock();
         int size = data.length;
 
-        tracer.logProducerAccessingMonitor(index, size, false);
+        tracer.logProducerAccessingMonitor(index, size, true);
 
         try {
             while (lock.hasWaiters(firstProducerCond)) {
@@ -70,20 +70,18 @@ public class BufferFourCond extends Buffer{
 
         lock.lock();
 
-        tracer.logConsumerAccessingMonitor(index, size,false);
+        tracer.logConsumerAccessingMonitor(index, size,true);
 
         int[] ret = new int[size];
         try {
             while(lock.hasWaiters(firstConsumerCond)) {
                 tracer.logConsumer(index, size, true);
                 consumersCond.await();
-                tracer.logConsumerAccessingMonitor(index, size,false);
                 tracer.unlogConsumer(index, size,true);
             }
             while (cannotTake(size)) {
                 tracer.logFirstConsumer(index, size, true);
                 firstConsumerCond.await();
-                tracer.logConsumerAccessingMonitor(index, size,false);
                 tracer.unlogFirstConsumer(index, size,true);
             }
 

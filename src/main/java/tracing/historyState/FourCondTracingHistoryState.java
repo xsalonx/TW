@@ -2,6 +2,7 @@ package tracing.historyState;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.IntStream;
 
@@ -26,15 +27,15 @@ public class FourCondTracingHistoryState implements StateI{
     public final int[] producersAccessingMonitorTimes;
     public final int[] producersCompletingTaskTimes;
 
-    public final HashMap<Integer, Integer> firstProducerWaiters;
-    public final HashMap<Integer, Integer> producersWaiters;
+    public final LinkedHashMap<Integer, Integer> firstProducerWaiters;
+    public final LinkedHashMap<Integer, Integer> producersWaiters;
 
 
     public final int[] consumersAccessingMonitorTimes;
     public final int[] consumersCompletingTaskTimes;
 
-    public final HashMap<Integer, Integer> firstConsumerWaiters;
-    public final HashMap<Integer, Integer> consumersWaiters;
+    public final LinkedHashMap<Integer, Integer> firstConsumerWaiters;
+    public final LinkedHashMap<Integer, Integer> consumersWaiters;
 
     public Integer workerInMonitorIndex;
     public Character workerInMonitorType;
@@ -61,13 +62,13 @@ public class FourCondTracingHistoryState implements StateI{
     public FourCondTracingHistoryState(int producersNumb, int consumersNumb) {
         producersAccessingMonitorTimes = new int[producersNumb];
         producersCompletingTaskTimes = new int[producersNumb];
-        firstProducerWaiters = new HashMap<>();
-        producersWaiters = new HashMap<>();
+        firstProducerWaiters = new LinkedHashMap<>();
+        producersWaiters = new LinkedHashMap<>();
 
         consumersAccessingMonitorTimes = new int[consumersNumb];
         consumersCompletingTaskTimes = new int[consumersNumb];
-        firstConsumerWaiters = new HashMap<>();
-        consumersWaiters = new HashMap<>();
+        firstConsumerWaiters = new LinkedHashMap<>();
+        consumersWaiters = new LinkedHashMap<>();
 
         bufferState = "";
     }
@@ -76,15 +77,15 @@ public class FourCondTracingHistoryState implements StateI{
         producersAccessingMonitorTimes = tracingHistoryState.producersAccessingMonitorTimes.clone();
         producersCompletingTaskTimes = tracingHistoryState.producersCompletingTaskTimes.clone();
 
-        firstProducerWaiters = (HashMap<Integer, Integer>) tracingHistoryState.firstProducerWaiters.clone();
-        producersWaiters = (HashMap<Integer, Integer>) tracingHistoryState.producersWaiters.clone();
+        firstProducerWaiters = (LinkedHashMap<Integer, Integer>) tracingHistoryState.firstProducerWaiters.clone();
+        producersWaiters = (LinkedHashMap<Integer, Integer>) tracingHistoryState.producersWaiters.clone();
 
 
         consumersAccessingMonitorTimes = tracingHistoryState.consumersAccessingMonitorTimes.clone();
         consumersCompletingTaskTimes = tracingHistoryState.consumersCompletingTaskTimes.clone();
 
-        firstConsumerWaiters = (HashMap<Integer, Integer>) tracingHistoryState.firstConsumerWaiters.clone();
-        consumersWaiters = (HashMap<Integer, Integer>) tracingHistoryState.consumersWaiters.clone();
+        firstConsumerWaiters = (LinkedHashMap<Integer, Integer>) tracingHistoryState.firstConsumerWaiters.clone();
+        consumersWaiters = (LinkedHashMap<Integer, Integer>) tracingHistoryState.consumersWaiters.clone();
 
         workerInMonitorType = tracingHistoryState.workerInMonitorType;
         workerInMonitorIndex = tracingHistoryState.workerInMonitorIndex;

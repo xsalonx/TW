@@ -1,6 +1,6 @@
-import concurrentBuffer.Buffer;
-import pseudoCond.PseudoCond;
-import tracing.ThreadTracingLoggerI;
+import concurrentBuffer.*;
+import pseudoCond.*;
+import tracing.*;
 
 import java.util.ConcurrentModificationException;
 import java.util.Random;
@@ -12,7 +12,7 @@ import java.util.Scanner;
  * */
 
 
-public class MainMonitorAccesses {
+public class Main {
 
 
     static class Worker implements Runnable {
@@ -86,22 +86,24 @@ public class MainMonitorAccesses {
     public static void main(String[] args) {
 
 
-        int producersNumb = 20;
-        int consumersNumb = 5;
-        int bufferSize = 100;
-        dataSizeUpperBound_1 = 40;
+        int producersNumb = Integer.parseInt(args[0]);
+        int consumersNumb = Integer.parseInt(args[1]);
+        int bufferSize = Integer.parseInt(args[2]);
+
         dataSizeLowerBound_1 = 1;
+        dataSizeUpperBound_1 = bufferSize / 4;
 
-        alterPoint = 10;
+        alterPoint = Math.max(producersNumb, consumersNumb) / 2;
 
-        dataSizeUpperBound_2 = 45;
-        dataSizeLowerBound_2 = 40;
+        dataSizeLowerBound_2 = bufferSize / 4;
+        dataSizeUpperBound_2 = bufferSize / 2;
+
 
         dataBound = 1;
         workersDelay = 1;
 
 
-        Buffer buffer = new concurrentBuffer.BufferFourCond(bufferSize, pseudoCond, producersNumb, consumersNumb);
+        Buffer buffer = new BufferFourCond(bufferSize, pseudoCond, producersNumb, consumersNumb);
 
 
         ThreadTracingLoggerI tracer = buffer.getTracer();
